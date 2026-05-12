@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RIVERFISH70 — речная рыба из Зырянского</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="min-h-screen bg-zinc-950 text-white">
+      <nav
+        class="sticky top-0 z-50 border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md"
+        aria-label="Основная навигация"
+      >
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+          <a href="#" class="text-lg font-black tracking-wide text-white md:text-xl">RIVERFISH70</a>
+          <div class="flex items-center gap-4 text-sm font-semibold text-zinc-300 sm:gap-6 md:text-base">
+            <a href="#catalog" class="transition hover:text-white">Каталог</a>
+            <a href="#about" class="hidden transition hover:text-white sm:inline">О нас</a>
+            <a
+              href="https://t.me/riverfish70"
+              class="rounded-xl bg-yellow-500 px-4 py-2 text-black transition hover:bg-yellow-400"
+            >
+              Telegram
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <header class="relative h-[500px] overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=1600&auto=format&fit=crop"
+          alt="Река"
+          class="absolute inset-0 h-full w-full object-cover opacity-40"
+        />
+
+        <div class="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+          <h1 class="text-5xl font-black tracking-wide md:text-7xl">RIVERFISH70</h1>
+
+          <p class="mt-6 max-w-2xl text-lg text-zinc-200 md:text-2xl">
+            Свежая речная рыба из Зырянского
+          </p>
+
+          <div class="mt-8 flex gap-4">
+            <a
+              href="#catalog"
+              class="rounded-2xl bg-white px-6 py-3 font-semibold text-black transition hover:scale-105"
+            >
+              Смотреть каталог
+            </a>
+
+            <a
+              href="https://t.me/riverfish70"
+              class="rounded-2xl border border-white px-6 py-3 font-semibold transition hover:bg-white hover:text-black"
+            >
+              Telegram
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <section class="mx-auto max-w-7xl px-6 py-20" id="catalog">
+        <div class="mb-12 text-center">
+          <h2 class="text-4xl font-bold">Каталог</h2>
+          <p class="mt-4 text-zinc-400">Натуральная речная рыба, свежий улов</p>
+        </div>
+
+        <div class="grid gap-8 md:grid-cols-2">
+          <div class="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-2xl">
+            <img
+              src="https://images.unsplash.com/photo-1544943910-4c1dc44aab44?q=80&w=1200&auto=format&fit=crop"
+              alt="Сушёный окунь"
+              class="h-64 w-full object-cover"
+            />
+            <div class="p-6">
+              <h3 class="text-2xl font-bold">Сушёный окунь</h3>
+              <p class="mt-2 text-xl text-yellow-400">850 ₽/кг</p>
+              <button
+                type="button"
+                class="mt-6 w-full rounded-2xl bg-yellow-500 px-4 py-3 font-semibold text-black transition hover:scale-[1.02]"
+              >
+                Заказать
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-2xl">
+            <img
+              src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=1200&auto=format&fit=crop"
+              alt="Свежий улов"
+              class="h-64 w-full object-cover"
+            />
+            <div class="p-6">
+              <h3 class="text-2xl font-bold">Свежий улов</h3>
+              <p class="mt-2 text-xl text-yellow-400">от 500 ₽</p>
+              <button
+                type="button"
+                class="mt-6 w-full rounded-2xl bg-yellow-500 px-4 py-3 font-semibold text-black transition hover:scale-[1.02]"
+              >
+                Заказать
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-zinc-900 px-6 py-20" id="about">
+        <div class="mx-auto max-w-5xl text-center">
+          <h2 class="text-4xl font-bold">Почему RiverFish70?</h2>
+
+          <div class="mt-12 grid gap-8 md:grid-cols-2">
+            <div class="rounded-3xl border border-zinc-800 p-8">
+              <h3 class="text-2xl font-bold">Свежий улов</h3>
+              <p class="mt-4 text-zinc-400">Только свежая речная рыба из местных водоёмов.</p>
+            </div>
+
+            <div class="rounded-3xl border border-zinc-800 p-8">
+              <h3 class="text-2xl font-bold">Доставка по району</h3>
+              <p class="mt-4 text-zinc-400">Привезём заказ по району — время и адрес согласуем в Telegram.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="border-t border-zinc-800 px-6 py-10 text-center text-zinc-400">
+        <h3 class="text-2xl font-bold text-white">RIVERFISH70</h3>
+
+        <p class="mt-4">Речной улов из Зырянского</p>
+
+        <div class="mt-6 flex justify-center gap-6">
+          <a href="https://t.me/riverfish70" class="hover:text-white">Telegram</a>
+          <a href="https://vk.com" class="hover:text-white">VK</a>
+          <a href="https://instagram.com" class="hover:text-white">Instagram</a>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
