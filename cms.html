@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Конструктор сайта — RiverFish70</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <script src="js/site-builder.js"></script>
+    <script>
+      tailwind.config = { theme: { extend: { fontFamily: { sans: ['Manrope', 'system-ui', 'sans-serif'] } } } };
+    </script>
+    <style>
+      .tab-active {
+        border-left: 3px solid #eab308;
+        background: rgba(39, 39, 42, 0.6);
+      }
+      .drag-handle {
+        cursor: grab;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-zinc-950 font-sans text-zinc-100">
+    <script>
+      var RIVERFISH_CMS_PASSWORD = 'riverfish70';
+      var STORAGE_KEY = 'riverfish70-data';
+      var AUTH_KEY = 'riverfish70-cms-auth';
+    </script>
+
+    <div id="screen-login" class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
+      <p class="text-center text-sm font-semibold uppercase tracking-widest text-yellow-500">RiverFish70</p>
+      <h1 class="mt-2 text-center text-3xl font-extrabold">Конструктор сайта</h1>
+      <p class="mt-2 text-center text-sm text-zinc-400">
+        Редактируйте блоки как в конструкторе: вкладки слева, перетаскивание строк для меню и карточек.
+      </p>
+      <p id="login-error" class="mt-4 hidden rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200"></p>
+      <form id="form-login" class="mt-8 space-y-4 rounded-3xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
+        <input type="hidden" name="action" value="login" />
+        <label class="block text-sm font-semibold text-zinc-300">Пароль</label>
+        <input
+          type="password"
+          id="input-password"
+          autocomplete="current-password"
+          required
+          class="w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:ring-2 focus:ring-yellow-500/40"
+        />
+        <button type="submit" class="w-full rounded-2xl bg-yellow-500 py-3 text-sm font-bold text-zinc-950 hover:bg-yellow-400">
+          Войти
+        </button>
+      </form>
+      <p class="mt-8 text-center text-sm text-zinc-500">
+        <a href="index.html" class="font-semibold text-yellow-500 hover:text-yellow-400">← На сайт</a>
+      </p>
+    </div>
+
+    <div id="screen-app" class="hidden min-h-screen">
+      <header class="border-b border-zinc-800 bg-zinc-900/90 backdrop-blur">
+        <div class="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4 px-4 py-3">
+          <div>
+            <h1 class="text-lg font-extrabold text-yellow-400">Конструктор RiverFish70</h1>
+            <p class="text-xs text-zinc-500">localStorage · <span class="font-mono">riverfish70-data</span></p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              id="btn-save-all"
+              class="rounded-xl bg-yellow-500 px-4 py-2 text-sm font-bold text-zinc-950 hover:bg-yellow-400"
+            >
+              Сохранить всё
+            </button>
+            <a
+              href="index.html"
+              target="_blank"
+              class="rounded-xl border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-200 hover:border-zinc-500"
+              >Сайт</a
+            >
+            <button type="button" id="btn-export" class="rounded-xl border border-zinc-700 px-4 py-2 text-sm font-semibold">
+              JSON
+            </button>
+            <label class="cursor-pointer rounded-xl border border-zinc-700 px-4 py-2 text-sm font-semibold">
+              Импорт
+              <input id="input-import" type="file" accept="application/json,.json" class="hidden" />
+            </label>
+            <button type="button" id="btn-logout" class="rounded-xl bg-zinc-800 px-4 py-2 text-sm font-semibold">Выйти</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="mx-auto flex max-w-[1600px]">
+        <aside class="w-64 shrink-0 border-r border-zinc-800 bg-zinc-950/80 py-4">
+          <nav class="flex flex-col gap-1 px-2" id="tab-buttons"></nav>
+        </aside>
+        <main class="max-h-[calc(100vh-57px)] flex-1 overflow-y-auto px-6 py-8">
+          <p id="flash" class="mb-6 hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200"></p>
+
+          <div id="panel-theme" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">Тема и SEO</h2>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="text-sm text-zinc-400">Акцентный цвет (кнопки, акценты)</label>
+                <input id="f-theme-accent" type="color" class="mt-1 h-12 w-full cursor-pointer rounded-xl border border-zinc-700 bg-zinc-900" />
+              </div>
+              <div>
+                <label class="text-sm text-zinc-400">Окончание заголовка вкладки</label>
+                <input id="f-seo-suffix" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Meta description</label>
+              <textarea id="f-seo-meta" rows="3" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"></textarea>
+            </div>
+          </div>
+
+          <div id="panel-media" class="tab-panel hidden max-w-5xl space-y-6">
+            <h2 class="text-2xl font-bold">Папка с фотографиями</h2>
+            <p class="text-sm leading-relaxed text-zinc-400">
+              В полях «URL фото» можно указывать только имя файла — на сайте путь соберётся как
+              <span class="font-mono text-yellow-500">папка/файл</span>. Полные https://-ссылки не трогаем.
+            </p>
+            <div>
+              <label class="text-sm text-zinc-400">Имя папки на сайте (для путей)</label>
+              <input
+                id="f-media-folder"
+                class="mt-1 w-full max-w-md rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-sm"
+                placeholder="media"
+              />
+            </div>
+
+            <div id="media-php-ui" class="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
+              <p id="media-php-status" class="text-sm text-zinc-400"></p>
+              <div class="flex flex-wrap items-center gap-2">
+                <input type="file" id="media-file-input" multiple accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/avif,.jpg,.jpeg,.png,.gif,.webp,.svg,.avif" class="max-w-full text-sm" />
+                <button type="button" id="btn-media-upload" class="rounded-xl bg-yellow-500 px-4 py-2 text-sm font-bold text-zinc-950 hover:bg-yellow-400">
+                  Загрузить
+                </button>
+                <button type="button" id="btn-media-refresh" class="rounded-xl border border-zinc-600 px-4 py-2 text-sm font-semibold hover:border-zinc-400">
+                  Обновить список
+                </button>
+              </div>
+              <div id="media-file-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+            </div>
+
+            <p id="media-file-hint-file" class="hidden rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
+              Сейчас страница открыта как <strong>файл с диска</strong> (file://). Браузер не даст загрузить файлы на сервер.
+              Откройте конструктор по адресу вида <span class="font-mono">http://localhost/…/cms.html</span> (PHP должен быть включён),
+              либо используйте <a href="cms.php" class="font-semibold text-yellow-400 underline">cms.php</a> на хостинге — там же работает папка media.
+            </p>
+          </div>
+
+          <div id="panel-brand" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">Бренд и меню</h2>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="text-sm text-zinc-400">Название в шапке</label>
+                <input id="f-brand-name" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+              <div>
+                <label class="text-sm text-zinc-400">Знак после названия</label>
+                <input id="f-brand-mark" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+            </div>
+            <p class="text-sm text-zinc-500">Пункты меню — перетаскивайте за ⋮⋮</p>
+            <div class="overflow-hidden rounded-2xl border border-zinc-800">
+              <table class="w-full text-sm">
+                <thead class="bg-zinc-900 text-left text-xs uppercase text-zinc-500">
+                  <tr>
+                    <th class="w-10 px-2 py-2"></th>
+                    <th class="px-2 py-2">Подпись</th>
+                    <th class="px-2 py-2">Ссылка</th>
+                    <th class="w-10 px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-nav"></tbody>
+              </table>
+              <button type="button" id="btn-nav-add" class="w-full border-t border-zinc-800 py-2 text-sm text-yellow-500 hover:bg-zinc-900">
+                + пункт меню
+              </button>
+            </div>
+          </div>
+
+          <div id="panel-hero" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">Первый экран</h2>
+            <div>
+              <label class="text-sm text-zinc-400">Бейдж над заголовком</label>
+              <input id="f-hero-badge" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Заголовок (пусто = как название бренда)</label>
+              <input id="f-hero-title" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Подзаголовок</label>
+              <textarea id="f-hero-sub" rows="2" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"></textarea>
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Фоновое фото (URL)</label>
+              <input
+                id="f-hero-bg"
+                placeholder="media/hero.jpg или https://..."
+                class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"
+              />
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="text-sm text-zinc-400">Кнопка 1 — текст</label>
+                <input id="f-hero-c1l" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+              <div>
+                <label class="text-sm text-zinc-400">Кнопка 1 — ссылка</label>
+                <input id="f-hero-c1h" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+              <div>
+                <label class="text-sm text-zinc-400">Кнопка 2 — текст</label>
+                <input id="f-hero-c2l" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+              <div>
+                <label class="text-sm text-zinc-400">Кнопка 2 — ссылка</label>
+                <input id="f-hero-c2h" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+            </div>
+            <p class="text-sm text-zinc-500">Показатели под кнопками</p>
+            <div class="overflow-hidden rounded-2xl border border-zinc-800">
+              <table class="w-full text-sm">
+                <thead class="bg-zinc-900 text-left text-xs uppercase text-zinc-500">
+                  <tr>
+                    <th class="w-10 px-2 py-2"></th>
+                    <th class="px-2 py-2">Подпись</th>
+                    <th class="px-2 py-2">Значение</th>
+                    <th class="w-10 px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-stats"></tbody>
+              </table>
+              <button type="button" id="btn-stats-add" class="w-full border-t border-zinc-800 py-2 text-sm text-yellow-500 hover:bg-zinc-900">
+                + показатель
+              </button>
+            </div>
+          </div>
+
+          <div id="panel-about" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">Блок «О нас»</h2>
+            <div>
+              <label class="text-sm text-zinc-400">Заголовок</label>
+              <input id="f-about-title" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Текст</label>
+              <textarea id="f-about-lead" rows="4" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"></textarea>
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Маркированный список (каждая строка — пункт)</label>
+              <textarea id="f-about-bullets" rows="5" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"></textarea>
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Картинка (URL)</label>
+              <input
+                id="f-about-img"
+                placeholder="media/o-nas.jpg или https://..."
+                class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"
+              />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Подпись к фото (alt)</label>
+              <input id="f-about-alt" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+          </div>
+
+          <div id="panel-trust" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">«Почему нам доверяют»</h2>
+            <div>
+              <label class="text-sm text-zinc-400">Заголовок секции</label>
+              <input id="f-trust-title" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Вводный текст</label>
+              <textarea id="f-trust-lead" rows="3" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"></textarea>
+            </div>
+            <p class="text-sm text-zinc-500">Карточки — порядок перетаскиванием</p>
+            <div class="overflow-hidden rounded-2xl border border-zinc-800">
+              <table class="w-full text-sm">
+                <thead class="bg-zinc-900 text-left text-xs uppercase text-zinc-500">
+                  <tr>
+                    <th class="w-10 px-2 py-2"></th>
+                    <th class="px-2 py-2">Заголовок</th>
+                    <th class="px-2 py-2">Текст</th>
+                    <th class="w-10 px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-trust"></tbody>
+              </table>
+              <button type="button" id="btn-trust-add" class="w-full border-t border-zinc-800 py-2 text-sm text-yellow-500 hover:bg-zinc-900">
+                + карточка
+              </button>
+            </div>
+          </div>
+
+          <div id="panel-catalog" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">Каталог (тексты секции)</h2>
+            <div>
+              <label class="text-sm text-zinc-400">Заголовок</label>
+              <input id="f-cat-title" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Подзаголовок под заголовком</label>
+              <textarea id="f-cat-intro" rows="2" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"></textarea>
+            </div>
+          </div>
+
+          <div id="panel-order" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">«Как заказать»</h2>
+            <div>
+              <label class="text-sm text-zinc-400">Заголовок</label>
+              <input id="f-order-title" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Подзаголовок</label>
+              <input id="f-order-sub" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Telegram для кнопки «Заказать» (ник без @)</label>
+              <input id="f-order-tg" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <p class="text-sm text-zinc-500">Шаги</p>
+            <div class="overflow-hidden rounded-2xl border border-zinc-800">
+              <table class="w-full text-sm">
+                <thead class="bg-zinc-900 text-left text-xs uppercase text-zinc-500">
+                  <tr>
+                    <th class="w-10 px-2 py-2"></th>
+                    <th class="px-2 py-2">Заголовок</th>
+                    <th class="px-2 py-2">Текст</th>
+                    <th class="w-10 px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-steps"></tbody>
+              </table>
+              <button type="button" id="btn-steps-add" class="w-full border-t border-zinc-800 py-2 text-sm text-yellow-500 hover:bg-zinc-900">
+                + шаг
+              </button>
+            </div>
+          </div>
+
+          <div id="panel-contacts" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">Контакты</h2>
+            <div>
+              <label class="text-sm text-zinc-400">Заголовок</label>
+              <input id="f-con-title" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div>
+              <label class="text-sm text-zinc-400">Текст</label>
+              <textarea id="f-con-text" rows="3" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"></textarea>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="text-sm text-zinc-400">Кнопка Telegram — подпись</label>
+                <input id="f-con-tgl" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+              <div>
+                <label class="text-sm text-zinc-400">Кнопка Telegram — ссылка</label>
+                <input id="f-con-tgh" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+            </div>
+            <p class="text-sm text-zinc-500">Боковые карточки</p>
+            <div class="overflow-hidden rounded-2xl border border-zinc-800">
+              <table class="w-full text-sm">
+                <thead class="bg-zinc-900 text-left text-xs uppercase text-zinc-500">
+                  <tr>
+                    <th class="w-10 px-2 py-2"></th>
+                    <th class="px-2 py-2">Верх</th>
+                    <th class="px-2 py-2">Название</th>
+                    <th class="px-2 py-2">Подпись</th>
+                    <th class="px-2 py-2">Ссылка</th>
+                    <th class="w-10 px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-ccards"></tbody>
+              </table>
+              <button type="button" id="btn-ccard-add" class="w-full border-t border-zinc-800 py-2 text-sm text-yellow-500 hover:bg-zinc-900">
+                + карточка
+              </button>
+            </div>
+          </div>
+
+          <div id="panel-footer" class="tab-panel hidden max-w-3xl space-y-6">
+            <h2 class="text-2xl font-bold">Подвал</h2>
+            <div>
+              <label class="text-sm text-zinc-400">Слоган под названием</label>
+              <input id="f-foot-tag" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="text-sm text-zinc-400">Ссылка «Редактирование» — текст</label>
+                <input id="f-foot-cmsl" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+              <div>
+                <label class="text-sm text-zinc-400">Ссылка «Редактирование» — URL</label>
+                <input id="f-foot-cmsh" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+              </div>
+            </div>
+            <p class="text-sm text-zinc-500">Ссылки в ряд (Telegram, VK…)</p>
+            <div class="overflow-hidden rounded-2xl border border-zinc-800">
+              <table class="w-full text-sm">
+                <thead class="bg-zinc-900 text-left text-xs uppercase text-zinc-500">
+                  <tr>
+                    <th class="w-10 px-2 py-2"></th>
+                    <th class="px-2 py-2">Текст</th>
+                    <th class="px-2 py-2">URL</th>
+                    <th class="w-10 px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-flinks"></tbody>
+              </table>
+              <button type="button" id="btn-flink-add" class="w-full border-t border-zinc-800 py-2 text-sm text-yellow-500 hover:bg-zinc-900">
+                + ссылка
+              </button>
+            </div>
+          </div>
+
+          <div id="panel-products" class="tab-panel hidden max-w-5xl space-y-8">
+            <h2 class="text-2xl font-bold">Товары</h2>
+            <div class="rounded-3xl border border-yellow-500/40 bg-zinc-900 p-6 ring-1 ring-yellow-500/20">
+              <h3 id="product-heading" class="text-lg font-bold">Новый товар</h3>
+              <form id="form-product" class="mt-4 grid gap-3 sm:grid-cols-2">
+                <input type="hidden" id="editing-id" value="0" />
+                <input id="p-name" placeholder="Название *" required class="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 sm:col-span-2" />
+                <textarea id="p-desc" rows="2" placeholder="Описание *" required class="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 sm:col-span-2"></textarea>
+                <input id="p-cat" placeholder="Категория *" required class="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+                <input id="p-price" placeholder="Цена *" required class="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+                <input id="p-old" placeholder="Старая цена" class="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+                <input id="p-disc" placeholder="Скидка" class="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2" />
+                <input id="p-img" placeholder="media/foto.jpg или https://..." required class="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 sm:col-span-2" />
+                <label class="flex items-center gap-2 sm:col-span-2">
+                  <input type="checkbox" id="p-promo" /> Акция
+                </label>
+                <div class="flex flex-wrap gap-2 sm:col-span-2">
+                  <button type="submit" id="btn-save-product" class="rounded-xl bg-yellow-500 px-4 py-2 text-sm font-bold text-zinc-950">
+                    Добавить
+                  </button>
+                  <button type="button" id="btn-cancel-edit" class="hidden rounded-xl border border-zinc-600 px-4 py-2 text-sm">Отмена</button>
+                </div>
+              </form>
+            </div>
+            <div class="overflow-hidden rounded-2xl border border-zinc-800">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-zinc-900 text-xs uppercase text-zinc-500">
+                  <tr>
+                    <th class="px-3 py-2">Фото</th>
+                    <th class="px-3 py-2">Название</th>
+                    <th class="px-3 py-2">Цена</th>
+                    <th class="px-3 py-2 text-right">Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-products"></tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script id="riverfish-defaults" type="application/json">{}</script>
+
+    <script>
+      ;(function () {
+        var B = window.RiverFishBuilder
+        var state = { site: {}, products: [], siteContent: {} }
+        var phpMediaCsrf = ''
+
+        function parseDefaults() {
+          try {
+            return JSON.parse(document.getElementById('riverfish-defaults').textContent)
+          } catch (e) {
+            return {}
+          }
+        }
+
+        function loadData() {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY)
+            if (raw) return B.migrate(JSON.parse(raw))
+          } catch (e) {}
+          return B.migrate(parseDefaults())
+        }
+
+        function saveData() {
+          B.syncSiteContent(state)
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+        }
+
+        function escapeHtml(s) {
+          return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+        }
+
+        function showFlash(msg) {
+          var f = document.getElementById('flash')
+          f.textContent = msg
+          f.classList.remove('hidden')
+          setTimeout(function () {
+            f.classList.add('hidden')
+          }, 3500)
+        }
+
+        function isAuthed() {
+          return sessionStorage.getItem(AUTH_KEY) === '1'
+        }
+        function setAuthed(v) {
+          if (v) sessionStorage.setItem(AUTH_KEY, '1')
+          else {
+            sessionStorage.removeItem(AUTH_KEY)
+            phpMediaCsrf = ''
+          }
+        }
+
+        function mediaApiUrl() {
+          return new URL('media-api.php', window.location.href).href
+        }
+
+        function mediaFolderInput() {
+          var el = document.getElementById('f-media-folder')
+          var v = el ? el.value.trim().replace(/\\/g, '/').replace(/\/+$/, '') : ''
+          return v || 'media'
+        }
+
+        function publicFileUrl(name) {
+          return new URL(mediaFolderInput() + '/' + encodeURIComponent(name), window.location.href).href
+        }
+
+        function parseJsonResponse(r) {
+          return r.text().then(function (t) {
+            var raw = String(t || '')
+            var trimmed = raw.replace(/^\uFEFF/, '').trim()
+            if (trimmed === '') {
+              return { ok: false, error: 'empty_response', httpStatus: r.status }
+            }
+            try {
+              return JSON.parse(trimmed)
+            } catch (e) {
+              return {
+                ok: false,
+                error: 'bad_json',
+                httpStatus: r.status,
+                preview: trimmed.slice(0, 160),
+              }
+            }
+          })
+        }
+
+        function fetchMediaList() {
+          return fetch(mediaApiUrl() + '?action=list', { credentials: 'include' }).then(parseJsonResponse)
+        }
+
+        function postMediaLogin() {
+          var fd = new FormData()
+          fd.append('action', 'login')
+          fd.append('password', RIVERFISH_CMS_PASSWORD)
+          return fetch(mediaApiUrl(), { method: 'POST', body: fd, credentials: 'include' }).then(parseJsonResponse)
+        }
+
+        function renderMediaGrid(files) {
+          var grid = document.getElementById('media-file-grid')
+          if (!grid) return
+          var folder = mediaFolderInput()
+          grid.innerHTML = (files || [])
+            .map(function (f) {
+              var rel = folder + '/' + f.name
+              var isImg = /\.(jpe?g|png|gif|webp|avif|svg)$/i.test(f.name)
+              var img = isImg
+                ? '<img src="' +
+                  escapeHtml(publicFileUrl(f.name)) +
+                  '" alt="" class="h-32 w-full rounded-lg object-cover bg-zinc-800"/>'
+                : '<div class="flex h-32 items-center justify-center rounded-lg bg-zinc-800 text-xs text-zinc-500">Файл</div>'
+              return (
+                '<div class="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-3">' +
+                img +
+                '<p class="mt-2 truncate font-mono text-xs text-zinc-300" title="' +
+                escapeHtml(f.name) +
+                '">' +
+                escapeHtml(f.name) +
+                '</p><p class="text-xs text-zinc-500">' +
+                Math.round((f.size || 0) / 1024) +
+                ' KB</p>' +
+                '<div class="mt-2 flex flex-wrap gap-1">' +
+                '<button type="button" class="media-copy rounded bg-zinc-800 px-2 py-1 text-xs hover:bg-zinc-700" data-path="' +
+                escapeHtml(rel) +
+                '">Копировать путь</button>' +
+                '<button type="button" class="media-del rounded bg-red-600/90 px-2 py-1 text-xs text-white hover:bg-red-600" data-name="' +
+                escapeHtml(f.name) +
+                '">Удалить</button></div></div>'
+              )
+            })
+            .join('')
+          grid.querySelectorAll('.media-copy').forEach(function (b) {
+            b.addEventListener('click', function () {
+              var t = b.getAttribute('data-path')
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(t).then(
+                  function () {
+                    showFlash('Скопировано: ' + t)
+                  },
+                  function () {
+                    window.prompt('Скопируйте путь:', t)
+                  }
+                )
+              } else {
+                window.prompt('Скопируйте путь:', t)
+              }
+            })
+          })
+          grid.querySelectorAll('.media-del').forEach(function (b) {
+            b.addEventListener('click', function () {
+              var n = b.getAttribute('data-name')
+              if (!confirm('Удалить файл «' + n + '» с сервера?')) return
+              deleteMediaFile(n)
+            })
+          })
+        }
+
+        function deleteMediaFile(name) {
+          var fd = new FormData()
+          fd.append('action', 'delete')
+          fd.append('csrf', phpMediaCsrf)
+          fd.append('name', name)
+          fetch(mediaApiUrl(), { method: 'POST', body: fd, credentials: 'include' })
+            .then(parseJsonResponse)
+            .then(function (j) {
+              if (j && j.csrf) phpMediaCsrf = j.csrf
+              if (j && j.ok) {
+                showFlash('Файл удалён')
+                refreshMediaPanel()
+              } else {
+                alert((j && j.error) || 'Ошибка удаления')
+              }
+            })
+        }
+
+        function uploadMediaFiles(fileList) {
+          var files = fileList ? Array.prototype.slice.call(fileList) : []
+          if (!files.length) return
+          var i = 0
+          function next() {
+            if (i >= files.length) {
+              showFlash('Загрузка завершена')
+              var inp = document.getElementById('media-file-input')
+              if (inp) inp.value = ''
+              refreshMediaPanel()
+              return
+            }
+            var fd = new FormData()
+            fd.append('action', 'upload')
+            fd.append('csrf', phpMediaCsrf)
+            fd.append('file', files[i])
+            fetch(mediaApiUrl(), { method: 'POST', body: fd, credentials: 'include' })
+              .then(parseJsonResponse)
+              .then(function (j) {
+                if (j && j.csrf) phpMediaCsrf = j.csrf
+                if (!j || !j.ok) alert('Файл «' + files[i].name + '»: ' + ((j && j.error) || 'ошибка'))
+                i++
+                next()
+              })
+              .catch(function () {
+                alert('Сеть')
+                i++
+                next()
+              })
+          }
+          next()
+        }
+
+        function refreshMediaPanel() {
+          var st = document.getElementById('media-php-status')
+          var hint = document.getElementById('media-file-hint-file')
+          var phpUi = document.getElementById('media-php-ui')
+          if (window.location.protocol === 'file:') {
+            if (hint) hint.classList.remove('hidden')
+            if (phpUi) phpUi.classList.add('hidden')
+            if (st) st.textContent = ''
+            return
+          }
+          if (hint) hint.classList.add('hidden')
+          if (phpUi) phpUi.classList.remove('hidden')
+          if (st) st.textContent = 'Загрузка списка…'
+          fetchMediaList().then(function (j) {
+            if (j && j.csrf) phpMediaCsrf = j.csrf
+            if (j && j.ok && Array.isArray(j.files)) {
+              if (st) st.textContent = 'Файлов: ' + j.files.length + '. Файлы на сервере в папке media/ (рядом с media-api.php).'
+              renderMediaGrid(j.files)
+              return
+            }
+            if (j && j.error === 'auth_required') {
+              return postMediaLogin().then(function (j2) {
+                if (!j2 || !j2.ok) {
+                  if (st) {
+                    st.textContent =
+                      'Вход в media-api.php не удался. Пароль в начале cms.html должен совпадать с RIVERFISH_CMS_PASSWORD в config.php.'
+                  }
+                  return null
+                }
+                phpMediaCsrf = j2.csrf
+                return fetchMediaList()
+              }).then(function (j3) {
+                if (!j3) return
+                if (j3 && j3.csrf) phpMediaCsrf = j3.csrf
+                if (j3 && j3.ok && Array.isArray(j3.files)) {
+                  if (st) st.textContent = 'Файлов: ' + j3.files.length + '.'
+                  renderMediaGrid(j3.files)
+                } else if (st) {
+                  st.textContent = 'Не удалось получить список: ' + ((j3 && j3.error) || 'ошибка')
+                }
+              })
+            }
+            if (st) {
+              if (j && j.error === 'bad_json') {
+                var pv = String((j && j.preview) || '')
+                var looksPhp = /^\s*<\?php/i.test(pv)
+                var looksHtml = /^<!DOCTYPE/i.test(pv) || /^<html/i.test(pv)
+                var livePort = window.location.port === '5500' || window.location.port === '5501'
+                if (looksPhp || (livePort && j.httpStatus === 200)) {
+                  st.innerHTML =
+                    '<strong class="text-amber-200">Live Server не выполняет PHP</strong> — по адресу с портом 5500 отдаётся <em>текст</em> файла media-api.php, поэтому не JSON. ' +
+                    'Закройте эту вкладку с Live Server и запустите в папке сайта файл <code class="rounded bg-zinc-800 px-1">start-php-server.cmd</code>, ' +
+                    'затем откройте <a class="text-yellow-400 underline" href="http://127.0.0.1:8080/cms.html" target="_blank" rel="noopener">http://127.0.0.1:8080/cms.html</a> (или OpenServer / XAMPP).'
+                } else if (looksHtml) {
+                  st.textContent =
+                    'Сервер вернул HTML (часто страница 404/ошибка), а не JSON. Проверьте URL и что PHP включён для этой папки.'
+                } else {
+                  st.textContent =
+                    'Ответ не JSON (код ' +
+                    (j.httpStatus != null ? j.httpStatus : '?') +
+                    '). Откройте в браузере: ' +
+                    mediaApiUrl() +
+                    '?action=list — по тексту страницы видна причина.'
+                }
+              } else {
+                st.textContent = 'Ошибка: ' + ((j && j.error) || 'проверьте PHP и файл media-api.php')
+              }
+            }
+          })
+        }
+
+        var tabs = [
+          { id: 'theme', label: 'Тема и SEO' },
+          { id: 'media', label: 'Папка фото' },
+          { id: 'brand', label: 'Бренд и меню' },
+          { id: 'hero', label: 'Первый экран' },
+          { id: 'about', label: 'О нас' },
+          { id: 'trust', label: 'Доверие' },
+          { id: 'catalog', label: 'Каталог' },
+          { id: 'order', label: 'Заказ' },
+          { id: 'contacts', label: 'Контакты' },
+          { id: 'footer', label: 'Подвал' },
+          { id: 'products', label: 'Товары' },
+        ]
+
+        function initTabs() {
+          var nav = document.getElementById('tab-buttons')
+          nav.innerHTML = tabs
+            .map(function (t) {
+              return (
+                '<button type="button" data-tab="' +
+                t.id +
+                '" class="w-full rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">' +
+                escapeHtml(t.label) +
+                '</button>'
+              )
+            })
+            .join('')
+          nav.querySelectorAll('button[data-tab]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var id = btn.getAttribute('data-tab')
+              nav.querySelectorAll('button').forEach(function (b) {
+                b.classList.toggle('tab-active', b === btn)
+              })
+              document.querySelectorAll('.tab-panel').forEach(function (p) {
+                p.classList.add('hidden')
+              })
+              document.getElementById('panel-' + id).classList.remove('hidden')
+              if (id === 'media') refreshMediaPanel()
+            })
+          })
+          nav.querySelector('button[data-tab="theme"]').click()
+        }
+
+        document.getElementById('btn-media-refresh').addEventListener('click', function () {
+          refreshMediaPanel()
+        })
+        document.getElementById('btn-media-upload').addEventListener('click', function () {
+          var inp = document.getElementById('media-file-input')
+          if (!inp || !inp.files || !inp.files.length) {
+            alert('Выберите один или несколько файлов.')
+            return
+          }
+          if (window.location.protocol === 'file:') return
+          function run() {
+            uploadMediaFiles(inp.files)
+          }
+          if (!phpMediaCsrf) {
+            postMediaLogin().then(function (j) {
+              if (j && j.csrf) phpMediaCsrf = j.csrf
+              run()
+            })
+            return
+          }
+          run()
+        })
+
+        function rowNav(item) {
+          return (
+            '<tr class="bg-zinc-950/80">' +
+            '<td class="drag-handle px-2 text-zinc-500">⋮⋮</td>' +
+            '<td class="px-1 py-1"><input class="nav-l w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(item.label) +
+            '"/></td>' +
+            '<td class="px-1 py-1"><input class="nav-h w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(item.href) +
+            '"/></td>' +
+            '<td class="px-1"><button type="button" class="row-del text-red-400 hover:text-red-300">×</button></td></tr>'
+          )
+        }
+
+        function rowStat(s) {
+          return (
+            '<tr class="bg-zinc-950/80">' +
+            '<td class="drag-handle px-2 text-zinc-500">⋮⋮</td>' +
+            '<td class="px-1 py-1"><input class="st-l w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(s.label) +
+            '"/></td>' +
+            '<td class="px-1 py-1"><input class="st-v w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(s.value) +
+            '"/></td>' +
+            '<td class="px-1"><button type="button" class="row-del text-red-400">×</button></td></tr>'
+          )
+        }
+
+        function rowTrust(c) {
+          return (
+            '<tr class="bg-zinc-950/80">' +
+            '<td class="drag-handle px-2">⋮⋮</td>' +
+            '<td class="px-1 py-1"><input class="tr-t w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(c.title) +
+            '"/></td>' +
+            '<td class="px-1 py-1"><input class="tr-x w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(c.text) +
+            '"/></td>' +
+            '<td class="px-1"><button type="button" class="row-del text-red-400">×</button></td></tr>'
+          )
+        }
+
+        function rowStep(st) {
+          return (
+            '<tr class="bg-zinc-950/80">' +
+            '<td class="drag-handle px-2">⋮⋮</td>' +
+            '<td class="px-1 py-1"><input class="st-t w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(st.title) +
+            '"/></td>' +
+            '<td class="px-1 py-1"><input class="st-x w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(st.text) +
+            '"/></td>' +
+            '<td class="px-1"><button type="button" class="row-del text-red-400">×</button></td></tr>'
+          )
+        }
+
+        function rowCcard(c) {
+          return (
+            '<tr class="bg-zinc-950/80">' +
+            '<td class="drag-handle px-2">⋮⋮</td>' +
+            '<td class="px-1 py-1"><input class="cc-k w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(c.kicker) +
+            '"/></td>' +
+            '<td class="px-1 py-1"><input class="cc-t w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(c.title) +
+            '"/></td>' +
+            '<td class="px-1 py-1"><input class="cc-h w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(c.hint) +
+            '"/></td>' +
+            '<td class="px-1 py-1"><input class="cc-u w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(c.href) +
+            '"/></td>' +
+            '<td class="px-1"><button type="button" class="row-del text-red-400">×</button></td></tr>'
+          )
+        }
+
+        function rowFlink(ln) {
+          return (
+            '<tr class="bg-zinc-950/80">' +
+            '<td class="drag-handle px-2">⋮⋮</td>' +
+            '<td class="px-1 py-1"><input class="fl-l w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(ln.label) +
+            '"/></td>' +
+            '<td class="px-1 py-1"><input class="fl-u w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1" value="' +
+            escapeHtml(ln.href) +
+            '"/></td>' +
+            '<td class="px-1"><button type="button" class="row-del text-red-400">×</button></td></tr>'
+          )
+        }
+
+        function bindRowDelete(tbody) {
+          tbody.querySelectorAll('.row-del').forEach(function (b) {
+            b.addEventListener('click', function () {
+              var tr = b.closest('tr')
+              if (tr) tr.remove()
+            })
+          })
+        }
+
+        function mountSortable(tbody, handle) {
+          if (typeof Sortable === 'undefined') return
+          if (tbody._rfSort) {
+            tbody._rfSort.destroy()
+            tbody._rfSort = null
+          }
+          tbody._rfSort = new Sortable(tbody, { handle: handle, animation: 150 })
+        }
+
+        function editorsToState() {
+          var s = state.site
+          if (!s.media) s.media = {}
+          s.media.folder =
+            document.getElementById('f-media-folder').value.trim().replace(/\\/g, '/').replace(/\/+$/, '') ||
+            'media'
+          s.theme.accent = document.getElementById('f-theme-accent').value
+          s.seo.titleSuffix = document.getElementById('f-seo-suffix').value.trim()
+          s.seo.metaDescription = document.getElementById('f-seo-meta').value.trim()
+          s.brand.name = document.getElementById('f-brand-name').value.trim()
+          s.brand.logoMark = document.getElementById('f-brand-mark').value || '.'
+          s.nav = []
+          document.querySelectorAll('#tbody-nav tr').forEach(function (tr) {
+            s.nav.push({
+              label: tr.querySelector('.nav-l').value.trim(),
+              href: tr.querySelector('.nav-h').value.trim(),
+            })
+          })
+          s.hero.badge = document.getElementById('f-hero-badge').value.trim()
+          s.hero.title = document.getElementById('f-hero-title').value.trim()
+          s.hero.subtitle = document.getElementById('f-hero-sub').value.trim()
+          s.hero.bgImage = document.getElementById('f-hero-bg').value.trim()
+          s.hero.ctaPrimary = {
+            label: document.getElementById('f-hero-c1l').value.trim(),
+            href: document.getElementById('f-hero-c1h').value.trim(),
+          }
+          s.hero.ctaSecondary = {
+            label: document.getElementById('f-hero-c2l').value.trim(),
+            href: document.getElementById('f-hero-c2h').value.trim(),
+          }
+          s.hero.stats = []
+          document.querySelectorAll('#tbody-stats tr').forEach(function (tr) {
+            s.hero.stats.push({
+              label: tr.querySelector('.st-l').value.trim(),
+              value: tr.querySelector('.st-v').value.trim(),
+            })
+          })
+          s.about.title = document.getElementById('f-about-title').value.trim()
+          s.about.lead = document.getElementById('f-about-lead').value.trim()
+          s.about.bullets = document
+            .getElementById('f-about-bullets')
+            .value.split('\n')
+            .map(function (x) {
+              return x.trim()
+            })
+            .filter(Boolean)
+          s.about.image = document.getElementById('f-about-img').value.trim()
+          s.about.imageAlt = document.getElementById('f-about-alt').value.trim()
+          s.trust.title = document.getElementById('f-trust-title').value.trim()
+          s.trust.lead = document.getElementById('f-trust-lead').value.trim()
+          s.trust.cards = []
+          document.querySelectorAll('#tbody-trust tr').forEach(function (tr) {
+            s.trust.cards.push({
+              title: tr.querySelector('.tr-t').value.trim(),
+              text: tr.querySelector('.tr-x').value.trim(),
+            })
+          })
+          s.catalog.title = document.getElementById('f-cat-title').value.trim()
+          s.catalog.intro = document.getElementById('f-cat-intro').value.trim()
+          s.order.title = document.getElementById('f-order-title').value.trim()
+          s.order.subtitle = document.getElementById('f-order-sub').value.trim()
+          s.order.telegramUser = document.getElementById('f-order-tg').value.trim().replace(/^@/, '')
+          s.order.steps = []
+          document.querySelectorAll('#tbody-steps tr').forEach(function (tr) {
+            s.order.steps.push({
+              title: tr.querySelector('.st-t').value.trim(),
+              text: tr.querySelector('.st-x').value.trim(),
+            })
+          })
+          s.contacts.title = document.getElementById('f-con-title').value.trim()
+          s.contacts.text = document.getElementById('f-con-text').value.trim()
+          s.contacts.telegramCtaLabel = document.getElementById('f-con-tgl').value.trim()
+          s.contacts.telegramHref = document.getElementById('f-con-tgh').value.trim()
+          s.contacts.cards = []
+          document.querySelectorAll('#tbody-ccards tr').forEach(function (tr) {
+            s.contacts.cards.push({
+              kicker: tr.querySelector('.cc-k').value.trim(),
+              title: tr.querySelector('.cc-t').value.trim(),
+              hint: tr.querySelector('.cc-h').value.trim(),
+              href: tr.querySelector('.cc-u').value.trim(),
+            })
+          })
+          s.footer.tagline = document.getElementById('f-foot-tag').value.trim()
+          s.footer.cmsLabel = document.getElementById('f-foot-cmsl').value.trim()
+          s.footer.cmsHref = document.getElementById('f-foot-cmsh').value.trim()
+          s.footer.links = []
+          document.querySelectorAll('#tbody-flinks tr').forEach(function (tr) {
+            s.footer.links.push({
+              label: tr.querySelector('.fl-l').value.trim(),
+              href: tr.querySelector('.fl-u').value.trim(),
+            })
+          })
+          state.site = s
+        }
+
+        function stateToEditors() {
+          var s = state.site
+          document.getElementById('f-media-folder').value = B.normMediaFolder(s)
+          document.getElementById('f-theme-accent').value = s.theme.accent || '#eab308'
+          document.getElementById('f-seo-suffix').value = s.seo.titleSuffix || ''
+          document.getElementById('f-seo-meta').value = s.seo.metaDescription || ''
+          document.getElementById('f-brand-name').value = s.brand.name || ''
+          document.getElementById('f-brand-mark').value = s.brand.logoMark || '.'
+          var tn = document.getElementById('tbody-nav')
+          tn.innerHTML = (s.nav || []).map(rowNav).join('')
+          bindRowDelete(tn)
+          mountSortable(tn, '.drag-handle')
+          document.getElementById('f-hero-badge').value = s.hero.badge || ''
+          document.getElementById('f-hero-title').value = s.hero.title || ''
+          document.getElementById('f-hero-sub').value = s.hero.subtitle || ''
+          document.getElementById('f-hero-bg').value = s.hero.bgImage || ''
+          document.getElementById('f-hero-c1l').value = (s.hero.ctaPrimary && s.hero.ctaPrimary.label) || ''
+          document.getElementById('f-hero-c1h').value = (s.hero.ctaPrimary && s.hero.ctaPrimary.href) || ''
+          document.getElementById('f-hero-c2l').value = (s.hero.ctaSecondary && s.hero.ctaSecondary.label) || ''
+          document.getElementById('f-hero-c2h').value = (s.hero.ctaSecondary && s.hero.ctaSecondary.href) || ''
+          var ts = document.getElementById('tbody-stats')
+          ts.innerHTML = (s.hero.stats || []).map(rowStat).join('')
+          bindRowDelete(ts)
+          mountSortable(ts, '.drag-handle')
+          document.getElementById('f-about-title').value = s.about.title || ''
+          document.getElementById('f-about-lead').value = s.about.lead || ''
+          document.getElementById('f-about-bullets').value = (s.about.bullets || []).join('\n')
+          document.getElementById('f-about-img').value = s.about.image || ''
+          document.getElementById('f-about-alt').value = s.about.imageAlt || ''
+          var tt = document.getElementById('tbody-trust')
+          tt.innerHTML = (s.trust.cards || []).map(rowTrust).join('')
+          bindRowDelete(tt)
+          mountSortable(tt, '.drag-handle')
+          document.getElementById('f-trust-title').value = s.trust.title || ''
+          document.getElementById('f-trust-lead').value = s.trust.lead || ''
+          document.getElementById('f-cat-title').value = s.catalog.title || ''
+          document.getElementById('f-cat-intro').value = s.catalog.intro || ''
+          document.getElementById('f-order-title').value = s.order.title || ''
+          document.getElementById('f-order-sub').value = s.order.subtitle || ''
+          document.getElementById('f-order-tg').value = s.order.telegramUser || ''
+          var st = document.getElementById('tbody-steps')
+          st.innerHTML = (s.order.steps || []).map(rowStep).join('')
+          bindRowDelete(st)
+          mountSortable(st, '.drag-handle')
+          document.getElementById('f-con-title').value = s.contacts.title || ''
+          document.getElementById('f-con-text').value = s.contacts.text || ''
+          document.getElementById('f-con-tgl').value = s.contacts.telegramCtaLabel || ''
+          document.getElementById('f-con-tgh').value = s.contacts.telegramHref || ''
+          var cc = document.getElementById('tbody-ccards')
+          cc.innerHTML = (s.contacts.cards || []).map(rowCcard).join('')
+          bindRowDelete(cc)
+          mountSortable(cc, '.drag-handle')
+          document.getElementById('f-foot-tag').value = s.footer.tagline || ''
+          document.getElementById('f-foot-cmsl').value = s.footer.cmsLabel || ''
+          document.getElementById('f-foot-cmsh').value = s.footer.cmsHref || ''
+          var fl = document.getElementById('tbody-flinks')
+          fl.innerHTML = (s.footer.links || []).map(rowFlink).join('')
+          bindRowDelete(fl)
+          mountSortable(fl, '.drag-handle')
+        }
+
+        function normalizeProduct(p) {
+          return {
+            id: parseInt(p.id, 10) || 0,
+            name: String(p.name || '').trim(),
+            description: String(p.description || '').trim(),
+            category: String(p.category || '').trim(),
+            price: String(p.price || '').trim(),
+            oldPrice: String(p.oldPrice || '').trim(),
+            discount: String(p.discount || '').trim(),
+            image: String(p.image || '').trim(),
+            isPromo: !!p.isPromo,
+          }
+        }
+
+        function sortedProducts() {
+          return (state.products || []).slice().sort(function (a, b) {
+            return (b.id || 0) - (a.id || 0)
+          })
+        }
+
+        function renderProducts() {
+          var tb = document.getElementById('tbody-products')
+          tb.innerHTML = sortedProducts()
+            .map(function (p) {
+              return (
+                '<tr class="border-t border-zinc-800">' +
+                '<td class="px-3 py-2"><img src="' +
+                escapeHtml(B.resolveMediaUrl(state.site, p.image)) +
+                '" class="h-10 w-14 rounded object-cover"/></td>' +
+                '<td class="px-3 py-2 font-medium">' +
+                escapeHtml(p.name) +
+                '</td>' +
+                '<td class="px-3 py-2 text-zinc-400">' +
+                escapeHtml(p.price) +
+                '</td>' +
+                '<td class="px-3 py-2 text-right">' +
+                '<button type="button" class="pe mr-1 rounded bg-yellow-500 px-2 py-1 text-xs font-bold text-zinc-950" data-id="' +
+                p.id +
+                '">Изм.</button>' +
+                '<button type="button" class="pd rounded bg-red-600 px-2 py-1 text-xs font-bold text-white" data-id="' +
+                p.id +
+                '">Уд.</button></td></tr>'
+              )
+            })
+            .join('')
+          tb.querySelectorAll('.pe').forEach(function (b) {
+            b.addEventListener('click', function () {
+              var id = parseInt(b.getAttribute('data-id'), 10)
+              var p = state.products.find(function (x) {
+                return x.id === id
+              })
+              if (!p) return
+              document.getElementById('editing-id').value = String(id)
+              document.getElementById('p-name').value = p.name
+              document.getElementById('p-desc').value = p.description
+              document.getElementById('p-cat').value = p.category
+              document.getElementById('p-price').value = p.price
+              document.getElementById('p-old').value = p.oldPrice
+              document.getElementById('p-disc').value = p.discount
+              document.getElementById('p-img').value = p.image
+              document.getElementById('p-promo').checked = !!p.isPromo
+              document.getElementById('product-heading').textContent = 'Редактирование'
+              document.getElementById('btn-save-product').textContent = 'Сохранить'
+              document.getElementById('btn-cancel-edit').classList.remove('hidden')
+            })
+          })
+          tb.querySelectorAll('.pd').forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (!confirm('Удалить?')) return
+              var id = parseInt(b.getAttribute('data-id'), 10)
+              state.products = state.products.filter(function (x) {
+                return x.id !== id
+              })
+              saveData()
+              renderProducts()
+            })
+          })
+        }
+
+        function resetProductForm() {
+          document.getElementById('editing-id').value = '0'
+          document.getElementById('form-product').reset()
+          document.getElementById('product-heading').textContent = 'Новый товар'
+          document.getElementById('btn-save-product').textContent = 'Добавить'
+          document.getElementById('btn-cancel-edit').classList.add('hidden')
+        }
+
+        document.getElementById('btn-nav-add').addEventListener('click', function () {
+          var tb = document.getElementById('tbody-nav')
+          tb.insertAdjacentHTML('beforeend', rowNav({ label: 'Раздел', href: '#' }))
+          bindRowDelete(tb)
+        })
+        document.getElementById('btn-stats-add').addEventListener('click', function () {
+          var tb = document.getElementById('tbody-stats')
+          tb.insertAdjacentHTML('beforeend', rowStat({ label: '', value: '' }))
+          bindRowDelete(tb)
+        })
+        document.getElementById('btn-trust-add').addEventListener('click', function () {
+          var tb = document.getElementById('tbody-trust')
+          tb.insertAdjacentHTML('beforeend', rowTrust({ title: '', text: '' }))
+          bindRowDelete(tb)
+        })
+        document.getElementById('btn-steps-add').addEventListener('click', function () {
+          var tb = document.getElementById('tbody-steps')
+          tb.insertAdjacentHTML('beforeend', rowStep({ title: '', text: '' }))
+          bindRowDelete(tb)
+        })
+        document.getElementById('btn-ccard-add').addEventListener('click', function () {
+          var tb = document.getElementById('tbody-ccards')
+          tb.insertAdjacentHTML('beforeend', rowCcard({ kicker: '', title: '', hint: '', href: '#' }))
+          bindRowDelete(tb)
+        })
+        document.getElementById('btn-flink-add').addEventListener('click', function () {
+          var tb = document.getElementById('tbody-flinks')
+          tb.insertAdjacentHTML('beforeend', rowFlink({ label: '', href: '#' }))
+          bindRowDelete(tb)
+        })
+
+        document.getElementById('btn-save-all').addEventListener('click', function () {
+          editorsToState()
+          saveData()
+          showFlash('Сохранено. Обновите index.html (или откройте заново).')
+        })
+
+        document.getElementById('form-product').addEventListener('submit', function (e) {
+          e.preventDefault()
+          editorsToState()
+          var editing = parseInt(document.getElementById('editing-id').value, 10) || 0
+          var row = normalizeProduct({
+            id: editing > 0 ? editing : Date.now(),
+            name: document.getElementById('p-name').value,
+            description: document.getElementById('p-desc').value,
+            category: document.getElementById('p-cat').value,
+            price: document.getElementById('p-price').value,
+            oldPrice: document.getElementById('p-old').value,
+            discount: document.getElementById('p-disc').value,
+            image: document.getElementById('p-img').value,
+            isPromo: document.getElementById('p-promo').checked,
+          })
+          if (!row.name || !row.description || !row.category || !row.price || !row.image) {
+            alert('Заполните обязательные поля товара.')
+            return
+          }
+          var list = state.products || []
+          if (editing > 0) {
+            var ix = list.findIndex(function (x) {
+              return x.id === editing
+            })
+            if (ix >= 0) list[ix] = row
+            else list.unshift(row)
+          } else list.unshift(row)
+          state.products = list
+          saveData()
+          resetProductForm()
+          renderProducts()
+          showFlash('Товары обновлены.')
+        })
+        document.getElementById('btn-cancel-edit').addEventListener('click', resetProductForm)
+
+        document.getElementById('btn-export').addEventListener('click', function () {
+          editorsToState()
+          B.syncSiteContent(state)
+          var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+          var url = URL.createObjectURL(blob)
+          var a = document.createElement('a')
+          a.href = url
+          a.download = 'riverfish70-data.json'
+          a.click()
+          URL.revokeObjectURL(url)
+        })
+
+        document.getElementById('input-import').addEventListener('change', function (ev) {
+          var file = ev.target.files && ev.target.files[0]
+          ev.target.value = ''
+          if (!file) return
+          var reader = new FileReader()
+          reader.onload = function () {
+            try {
+              var json = JSON.parse(reader.result)
+              state = B.migrate(json)
+              saveData()
+              stateToEditors()
+              renderProducts()
+              showFlash('Импорт выполнен.')
+            } catch (e) {
+              alert('Ошибка файла.')
+            }
+          }
+          reader.readAsText(file, 'UTF-8')
+        })
+
+        document.getElementById('form-login').addEventListener('submit', function (e) {
+          e.preventDefault()
+          var err = document.getElementById('login-error')
+          err.classList.add('hidden')
+          if (document.getElementById('input-password').value !== RIVERFISH_CMS_PASSWORD) {
+            err.textContent = 'Неверный пароль.'
+            err.classList.remove('hidden')
+            return
+          }
+          setAuthed(true)
+          state = loadData()
+          stateToEditors()
+          renderProducts()
+          initTabs()
+          document.getElementById('screen-login').classList.add('hidden')
+          document.getElementById('screen-app').classList.remove('hidden')
+        })
+
+        document.getElementById('btn-logout').addEventListener('click', function () {
+          setAuthed(false)
+          document.getElementById('screen-app').classList.add('hidden')
+          document.getElementById('screen-login').classList.remove('hidden')
+        })
+
+        if (isAuthed()) {
+          state = loadData()
+          stateToEditors()
+          renderProducts()
+          initTabs()
+          document.getElementById('screen-login').classList.add('hidden')
+          document.getElementById('screen-app').classList.remove('hidden')
+        }
+      })()
+    </script>
+  </body>
+</html>

@@ -1,138 +1,492 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RIVERFISH70 — речная рыба из Зырянского</title>
+    <meta id="meta-desc" name="description" content="" />
+    <title id="doc-title">RIVERFISH70</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+            boxShadow: {
+              glow: '0 0 60px -12px color-mix(in srgb, var(--rf-accent, #eab308) 35%, transparent)',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        --rf-accent: #eab308;
+      }
+      .rf-primary {
+        background-color: var(--rf-accent, #eab308);
+        color: #18181b;
+      }
+      .rf-primary:hover {
+        filter: brightness(1.06);
+      }
+      .text-rf {
+        color: var(--rf-accent, #eab308);
+      }
+      .border-rf-soft {
+        border-color: color-mix(in srgb, var(--rf-accent, #eab308) 30%, transparent);
+      }
+      .bg-rf-soft {
+        background-color: color-mix(in srgb, var(--rf-accent, #eab308) 15%, transparent);
+      }
+    </style>
+    <script src="js/site-builder.js"></script>
   </head>
-  <body>
-    <div class="min-h-screen bg-zinc-950 text-white">
-      <nav
-        class="sticky top-0 z-50 border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md"
-        aria-label="Основная навигация"
-      >
-        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-          <a href="#" class="text-lg font-black tracking-wide text-white md:text-xl">RIVERFISH70</a>
-          <div class="flex items-center gap-4 text-sm font-semibold text-zinc-300 sm:gap-6 md:text-base">
-            <a href="#catalog" class="transition hover:text-white">Каталог</a>
-            <a href="#about" class="hidden transition hover:text-white sm:inline">О нас</a>
-            <a
-              href="https://t.me/riverfish70"
-              class="rounded-xl bg-yellow-500 px-4 py-2 text-black transition hover:bg-yellow-400"
-            >
-              Telegram
-            </a>
-          </div>
+  <body class="min-h-screen bg-zinc-950 font-sans text-zinc-100 antialiased">
+    <a
+      href="#catalog"
+      class="rf-primary fixed left-4 top-4 z-[100] -translate-y-20 rounded-xl px-4 py-2 text-sm font-bold opacity-0 shadow-lg transition focus:translate-y-0 focus:opacity-100"
+      >К каталогу</a
+    >
+
+    <header
+      class="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-zinc-950/75 backdrop-blur-md transition-colors"
+      id="top"
+    >
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6">
+        <a href="#top" id="brand-link" class="text-lg font-extrabold tracking-tight text-white md:text-xl"
+          ><span id="brand-text"></span><span id="brand-mark" class="text-rf">.</span></a
+        >
+        <nav id="nav-mount" class="hidden items-center gap-8 text-sm font-semibold text-zinc-300 md:flex"></nav>
+        <div class="flex items-center gap-2">
+          <a
+            id="header-cta"
+            href="#catalog"
+            class="rf-primary hidden rounded-full px-4 py-2 text-sm font-bold shadow-glow sm:inline-block"
+            >В каталог</a
+          >
         </div>
-      </nav>
+      </div>
+    </header>
 
-      <header class="relative h-[500px] overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=1600&auto=format&fit=crop"
-          alt="Река"
-          class="absolute inset-0 h-full w-full object-cover opacity-40"
-        />
+    <section class="relative isolate min-h-[min(88vh,720px)] overflow-hidden pt-16">
+      <img
+        id="hero-bgimg"
+        src=""
+        alt=""
+        class="absolute inset-0 h-full w-full object-cover"
+        fetchpriority="high"
+      />
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-zinc-950/20 via-zinc-950/75 to-zinc-950"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="pointer-events-none absolute -left-24 top-1/3 h-72 w-72 rounded-full bg-rf-soft blur-3xl"
+        aria-hidden="true"
+      ></div>
 
-        <div class="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          <h1 class="text-5xl font-black tracking-wide md:text-7xl">RIVERFISH70</h1>
-
-          <p class="mt-6 max-w-2xl text-lg text-zinc-200 md:text-2xl">
-            Свежая речная рыба из Зырянского
-          </p>
-
-          <div class="mt-8 flex gap-4">
-            <a
-              href="#catalog"
-              class="rounded-2xl bg-white px-6 py-3 font-semibold text-black transition hover:scale-105"
-            >
-              Смотреть каталог
-            </a>
-
-            <a
-              href="https://t.me/riverfish70"
-              class="rounded-2xl border border-white px-6 py-3 font-semibold transition hover:bg-white hover:text-black"
-            >
-              Telegram
-            </a>
-          </div>
+      <div class="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-6 pb-24 pt-20 text-center md:pt-28">
+        <p
+          id="hero-badge"
+          class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-rf"
+        ></p>
+        <h1
+          id="hero-title"
+          class="text-balance text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl"
+        ></h1>
+        <p
+          id="hero-subtitle"
+          class="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-zinc-200 md:text-xl"
+        ></p>
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <a
+            id="hero-cta-primary"
+            href="#"
+            class="rf-primary inline-flex items-center justify-center rounded-2xl px-8 py-3.5 text-base font-bold shadow-glow transition hover:-translate-y-0.5"
+          ></a>
+          <a
+            id="hero-cta-secondary"
+            href="#"
+            class="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-8 py-3.5 text-base font-semibold text-white backdrop-blur transition hover:border-white/40 hover:bg-white/10"
+          ></a>
         </div>
-      </header>
+        <div id="hero-stats" class="mt-16 grid w-full max-w-3xl grid-cols-3 gap-4 text-left sm:gap-6"></div>
+      </div>
+    </section>
 
-      <section class="mx-auto max-w-7xl px-6 py-20" id="catalog">
-        <div class="mb-12 text-center">
-          <h2 class="text-4xl font-bold">Каталог</h2>
-          <p class="mt-4 text-zinc-400">Натуральная речная рыба, свежий улов</p>
+    <section class="mx-auto max-w-7xl px-6 py-20 md:py-28" id="about">
+      <div class="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
+        <div>
+          <h2 id="about-title" class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl"></h2>
+          <p id="about-lead" class="mt-6 text-lg leading-relaxed text-zinc-400"></p>
+          <ul id="about-bullets" class="mt-8 space-y-4 text-zinc-300"></ul>
         </div>
-
-        <div class="grid gap-8 md:grid-cols-2">
-          <div class="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-2xl">
-            <img
-              src="https://images.unsplash.com/photo-1544943910-4c1dc44aab44?q=80&w=1200&auto=format&fit=crop"
-              alt="Сушёный окунь"
-              class="h-64 w-full object-cover"
-            />
-            <div class="p-6">
-              <h3 class="text-2xl font-bold">Сушёный окунь</h3>
-              <p class="mt-2 text-xl text-yellow-400">850 ₽/кг</p>
-              <button
-                type="button"
-                class="mt-6 w-full rounded-2xl bg-yellow-500 px-4 py-3 font-semibold text-black transition hover:scale-[1.02]"
-              >
-                Заказать
-              </button>
-            </div>
-          </div>
-
-          <div class="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-2xl">
-            <img
-              src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=1200&auto=format&fit=crop"
-              alt="Свежий улов"
-              class="h-64 w-full object-cover"
-            />
-            <div class="p-6">
-              <h3 class="text-2xl font-bold">Свежий улов</h3>
-              <p class="mt-2 text-xl text-yellow-400">от 500 ₽</p>
-              <button
-                type="button"
-                class="mt-6 w-full rounded-2xl bg-yellow-500 px-4 py-3 font-semibold text-black transition hover:scale-[1.02]"
-              >
-                Заказать
-              </button>
-            </div>
-          </div>
+        <div
+          class="group relative overflow-hidden rounded-[2.5rem] border border-zinc-800 bg-zinc-900 shadow-2xl ring-1 ring-white/5"
+        >
+          <img
+            id="about-img"
+            src=""
+            alt=""
+            class="h-full min-h-[320px] w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+            loading="lazy"
+          />
+          <div
+            class="pointer-events-none absolute inset-0 bg-gradient-to-tr from-zinc-950/60 via-transparent to-transparent"
+          ></div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="bg-zinc-900 px-6 py-20" id="about">
-        <div class="mx-auto max-w-5xl text-center">
-          <h2 class="text-4xl font-bold">Почему RiverFish70?</h2>
+    <section class="border-y border-zinc-800/80 bg-zinc-900/50 px-6 py-20 md:py-28">
+      <div class="mx-auto max-w-6xl text-center">
+        <h2 id="trust-title" class="text-3xl font-extrabold sm:text-5xl"></h2>
+        <p id="trust-lead" class="mx-auto mt-6 max-w-3xl text-pretty text-lg leading-relaxed text-zinc-400"></p>
+        <div id="trust-cards" class="mt-14 grid gap-6 md:grid-cols-3 md:gap-8"></div>
+      </div>
+    </section>
 
-          <div class="mt-12 grid gap-8 md:grid-cols-2">
-            <div class="rounded-3xl border border-zinc-800 p-8">
-              <h3 class="text-2xl font-bold">Свежий улов</h3>
-              <p class="mt-4 text-zinc-400">Только свежая речная рыба из местных водоёмов.</p>
-            </div>
+    <section class="mx-auto max-w-7xl px-6 py-20 md:py-28" id="catalog">
+      <div class="mx-auto mb-14 max-w-2xl text-center">
+        <h2 id="catalog-section-title" class="text-3xl font-extrabold sm:text-5xl"></h2>
+        <p id="catalog-intro" class="mt-4 text-lg text-zinc-400"></p>
+      </div>
+      <div id="catalog-grid" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
 
-            <div class="rounded-3xl border border-zinc-800 p-8">
-              <h3 class="text-2xl font-bold">Доставка по району</h3>
-              <p class="mt-4 text-zinc-400">Привезём заказ по району — время и адрес согласуем в Telegram.</p>
-            </div>
-          </div>
+    <section class="bg-gradient-to-b from-zinc-900 to-zinc-950 px-6 py-20 md:py-28" id="order">
+      <div class="mx-auto max-w-6xl">
+        <div class="text-center">
+          <h2 id="order-title" class="text-3xl font-extrabold sm:text-5xl"></h2>
+          <p id="order-subtitle" class="mx-auto mt-4 max-w-2xl text-zinc-400"></p>
         </div>
-      </section>
+        <ol id="order-steps" class="mt-14 grid gap-6 md:grid-cols-3"></ol>
+      </div>
+    </section>
 
-      <footer class="border-t border-zinc-800 px-6 py-10 text-center text-zinc-400">
-        <h3 class="text-2xl font-bold text-white">RIVERFISH70</h3>
-
-        <p class="mt-4">Речной улов из Зырянского</p>
-
-        <div class="mt-6 flex justify-center gap-6">
-          <a href="https://t.me/riverfish70" class="hover:text-white">Telegram</a>
-          <a href="https://vk.com" class="hover:text-white">VK</a>
-          <a href="https://instagram.com" class="hover:text-white">Instagram</a>
+    <section class="mx-auto max-w-7xl px-6 py-16 md:py-24" id="contacts">
+      <div class="grid gap-6 lg:grid-cols-3">
+        <div class="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-8 lg:col-span-1">
+          <h2 id="contacts-title" class="text-2xl font-extrabold"></h2>
+          <p id="contacts-text" class="mt-3 text-sm leading-relaxed text-zinc-400"></p>
+          <a
+            id="contacts-telegram"
+            href="#"
+            class="rf-primary mt-6 inline-flex w-full items-center justify-center rounded-2xl py-3 text-sm font-bold transition"
+          ></a>
         </div>
-      </footer>
-    </div>
+        <div id="contacts-cards" class="grid gap-6 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-2"></div>
+      </div>
+    </section>
+
+    <footer class="border-t border-zinc-800 px-6 py-12 text-center text-zinc-500">
+      <p id="footer-brand" class="text-lg font-bold text-white"></p>
+      <p id="footer-tagline" class="mt-2 text-sm"></p>
+      <p id="offline-hint" class="mx-auto mt-4 max-w-xl text-xs text-zinc-600"></p>
+      <div id="footer-links" class="mt-6 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-semibold"></div>
+    </footer>
+
+    <script id="riverfish-defaults" type="application/json">{}</script>
+
+    <script>
+      ;(function () {
+        var B = window.RiverFishBuilder
+        var STORAGE_KEY = 'riverfish70-data'
+
+        function parseDefaults() {
+          var el = document.getElementById('riverfish-defaults')
+          try {
+            return JSON.parse(el.textContent)
+          } catch (e) {
+            return {}
+          }
+        }
+
+        function loadFromStorage() {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY)
+            if (raw) return JSON.parse(raw)
+          } catch (e) {}
+          return null
+        }
+
+        function saveToStorage(data) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+          } catch (e) {}
+        }
+
+        function escapeHtml(s) {
+          return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+        }
+
+        function sortedProducts(products) {
+          return (products || []).slice().sort(function (a, b) {
+            return (b.id || 0) - (a.id || 0)
+          })
+        }
+
+        function render(data) {
+          var state = B.migrate(data || {})
+          var site = state.site
+          B.applyTheme(site)
+
+          var brandName = site.brand.name || ''
+          var heroTitle = (site.hero.title || '').trim() || brandName
+          document.getElementById('brand-text').textContent = brandName
+          document.getElementById('brand-mark').textContent = site.brand.logoMark || '.'
+          document.getElementById('hero-title').textContent = heroTitle
+          document.getElementById('hero-subtitle').textContent = site.hero.subtitle || ''
+          document.getElementById('hero-badge').textContent = site.hero.badge || ''
+          document.getElementById('hero-bgimg').src = B.resolveMediaUrl(site, site.hero.bgImage || '')
+
+          var ctaP = document.getElementById('hero-cta-primary')
+          ctaP.textContent = (site.hero.ctaPrimary && site.hero.ctaPrimary.label) || ''
+          ctaP.href = (site.hero.ctaPrimary && site.hero.ctaPrimary.href) || '#catalog'
+          var ctaS = document.getElementById('hero-cta-secondary')
+          ctaS.textContent = (site.hero.ctaSecondary && site.hero.ctaSecondary.label) || ''
+          ctaS.href = (site.hero.ctaSecondary && site.hero.ctaSecondary.href) || '#'
+
+          var hc = document.getElementById('header-cta')
+          hc.textContent = (site.hero.ctaPrimary && site.hero.ctaPrimary.label) || 'В каталог'
+          hc.href = (site.hero.ctaPrimary && site.hero.ctaPrimary.href) || '#catalog'
+
+          var nav = document.getElementById('nav-mount')
+          nav.innerHTML = (site.nav || [])
+            .map(function (item) {
+              return (
+                '<a class="transition hover:text-white" href="' +
+                escapeHtml(item.href) +
+                '">' +
+                escapeHtml(item.label) +
+                '</a>'
+              )
+            })
+            .join('')
+
+          var statsEl = document.getElementById('hero-stats')
+          statsEl.innerHTML = (site.hero.stats || [])
+            .map(function (s) {
+              return (
+                '<div class="rounded-2xl border border-white/10 bg-zinc-950/40 p-4 backdrop-blur sm:p-5">' +
+                '<div class="text-xs font-semibold uppercase tracking-wide text-zinc-400">' +
+                escapeHtml(s.label) +
+                '</div>' +
+                '<div class="text-rf mt-1 text-2xl font-extrabold sm:text-3xl">' +
+                escapeHtml(s.value) +
+                '</div></div>'
+              )
+            })
+            .join('')
+
+          document.getElementById('about-title').textContent = site.about.title || ''
+          document.getElementById('about-lead').textContent = site.about.lead || ''
+          document.getElementById('about-img').src = B.resolveMediaUrl(site, site.about.image || '')
+          document.getElementById('about-img').alt = site.about.imageAlt || ''
+          var ul = document.getElementById('about-bullets')
+          ul.innerHTML = (site.about.bullets || [])
+            .map(function (line) {
+              return (
+                '<li class="flex gap-3"><span class="mt-1 h-2 w-2 shrink-0 rounded-full" style="background:var(--rf-accent,#eab308)"></span><span>' +
+                escapeHtml(line) +
+                '</span></li>'
+              )
+            })
+            .join('')
+
+          document.getElementById('trust-title').textContent = site.trust.title || ''
+          document.getElementById('trust-lead').textContent = site.trust.lead || ''
+          document.getElementById('trust-cards').innerHTML = (site.trust.cards || [])
+            .map(function (card) {
+              return (
+                '<article class="rounded-3xl border border-zinc-800 bg-zinc-950/80 p-8 text-left shadow-xl transition hover:-translate-y-1 border-rf-soft hover:shadow-glow">' +
+                '<h3 class="text-xl font-bold text-rf">' +
+                escapeHtml(card.title) +
+                '</h3>' +
+                '<p class="mt-3 leading-relaxed text-zinc-400">' +
+                escapeHtml(card.text) +
+                '</p></article>'
+              )
+            })
+            .join('')
+
+          document.getElementById('catalog-section-title').textContent = site.catalog.title || 'Каталог'
+          document.getElementById('catalog-intro').textContent = site.catalog.intro || ''
+
+          document.getElementById('order-title').textContent = site.order.title || ''
+          document.getElementById('order-subtitle').textContent = site.order.subtitle || ''
+          var steps = document.getElementById('order-steps')
+          steps.innerHTML = (site.order.steps || [])
+            .map(function (st, i) {
+              var n = i + 1
+              return (
+                '<li class="relative rounded-3xl border border-zinc-800 bg-zinc-950 p-8">' +
+                '<span class="text-5xl font-black text-rf opacity-20">' +
+                n +
+                '</span>' +
+                '<h3 class="mt-2 text-lg font-bold text-white">' +
+                escapeHtml(st.title) +
+                '</h3>' +
+                '<p class="mt-2 text-sm leading-relaxed text-zinc-400">' +
+                escapeHtml(st.text) +
+                '</p></li>'
+              )
+            })
+            .join('')
+
+          document.getElementById('contacts-title').textContent = site.contacts.title || ''
+          document.getElementById('contacts-text').textContent = site.contacts.text || ''
+          var tg = document.getElementById('contacts-telegram')
+          tg.textContent = site.contacts.telegramCtaLabel || 'Telegram'
+          tg.href = site.contacts.telegramHref || '#'
+          document.getElementById('contacts-cards').innerHTML = (site.contacts.cards || [])
+            .map(function (c) {
+              return (
+                '<a href="' +
+                escapeHtml(c.href) +
+                '" class="flex flex-col justify-between rounded-3xl border border-zinc-800 bg-zinc-950 p-8 transition hover:border-zinc-600">' +
+                '<span class="text-sm font-semibold text-zinc-500">' +
+                escapeHtml(c.kicker) +
+                '</span>' +
+                '<span class="mt-4 text-xl font-bold text-white">' +
+                escapeHtml(c.title) +
+                '</span>' +
+                '<span class="mt-2 text-sm text-rf">' +
+                escapeHtml(c.hint) +
+                '</span></a>'
+              )
+            })
+            .join('')
+
+          document.getElementById('footer-brand').textContent = brandName
+          document.getElementById('footer-tagline').textContent = site.footer.tagline || ''
+          var links = (site.footer.links || [])
+            .map(function (ln) {
+              return (
+                '<a class="text-zinc-400 transition hover:text-white" href="' +
+                escapeHtml(ln.href) +
+                '">' +
+                escapeHtml(ln.label) +
+                '</a>'
+              )
+            })
+            .join('')
+          var cms =
+            '<a class="text-zinc-500 transition hover:text-zinc-300" href="' +
+            escapeHtml(site.footer.cmsHref || 'cms.html') +
+            '">' +
+            escapeHtml(site.footer.cmsLabel || 'Редактирование') +
+            '</a>'
+          document.getElementById('footer-links').innerHTML = links + cms
+
+          var suffix = (site.seo && site.seo.titleSuffix) || ' — свежая речная рыба'
+          document.title = brandName + suffix
+          var meta = (site.seo && site.seo.metaDescription) || ''
+          document.getElementById('meta-desc').setAttribute('content', meta)
+
+          var grid = document.getElementById('catalog-grid')
+          var list = sortedProducts(state.products || [])
+          grid.innerHTML = list
+            .map(function (p) {
+              var tgUrl = B.telegramOrderUrl(site, p.name, p.price)
+              var badge =
+                p.isPromo && p.discount
+                  ? '<span class="absolute left-4 top-4 rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white shadow-lg">' +
+                    escapeHtml(p.discount) +
+                    '</span>'
+                  : ''
+              var old =
+                p.isPromo && p.oldPrice
+                  ? '<span class="text-sm text-zinc-500 line-through">' + escapeHtml(p.oldPrice) + '</span>'
+                  : ''
+              return (
+                '<article class="group flex flex-col overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60 shadow-xl ring-1 ring-white/5 transition hover:-translate-y-1 hover:border-zinc-700 hover:shadow-2xl">' +
+                '<div class="relative aspect-[4/3] overflow-hidden">' +
+                '<img src="' +
+                escapeHtml(B.resolveMediaUrl(site, p.image)) +
+                '" alt="' +
+                escapeHtml(p.name) +
+                '" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy">' +
+                badge +
+                '</div>' +
+                '<div class="flex flex-1 flex-col p-6">' +
+                '<h3 class="text-xl font-bold text-white">' +
+                escapeHtml(p.name) +
+                '</h3>' +
+                '<p class="text-rf mt-1 text-sm font-semibold">' +
+                escapeHtml(p.category) +
+                '</p>' +
+                '<p class="mt-3 flex-1 text-sm leading-relaxed text-zinc-400">' +
+                escapeHtml(p.description) +
+                '</p>' +
+                '<div class="mt-5 flex flex-wrap items-baseline gap-2">' +
+                '<span class="text-rf text-2xl font-extrabold">' +
+                escapeHtml(p.price) +
+                '</span>' +
+                old +
+                '</div>' +
+                '<a href="' +
+                escapeHtml(tgUrl) +
+                '" class="rf-primary mt-6 inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-center text-sm font-bold transition">Заказать в Telegram</a>' +
+                '</div></article>'
+              )
+            })
+            .join('')
+        }
+
+        function init() {
+          var hintEl = document.getElementById('offline-hint')
+          if (window.location.protocol === 'file:') {
+            hintEl.textContent =
+              'Открыто с диска: данные из localStorage (редактор cms.html). Обновите страницу (F5) после сохранения в CMS. Файл data/site_data.json при file:// часто недоступен.'
+          } else {
+            hintEl.textContent =
+              'Данные: localStorage (cms.html), иначе при первом заходе — data/site_data.json, иначе встроенные значения конструктора.'
+          }
+
+          function apply(raw) {
+            render(raw)
+          }
+
+          var stored = loadFromStorage()
+          if (stored) {
+            apply(stored)
+          } else {
+            fetch('data/site_data.json', { cache: 'no-store' })
+              .then(function (r) {
+                return r.ok ? r.json() : Promise.reject()
+              })
+              .then(function (json) {
+                var merged = B.migrate(json)
+                B.syncSiteContent(merged)
+                saveToStorage(merged)
+                apply(merged)
+              })
+              .catch(function () {
+                apply(B.migrate(parseDefaults()))
+              })
+          }
+
+          window.addEventListener('storage', function (e) {
+            if (e.key !== STORAGE_KEY || !e.newValue) return
+            try {
+              apply(JSON.parse(e.newValue))
+            } catch (err) {}
+          })
+        }
+
+        init()
+      })()
+    </script>
   </body>
 </html>
