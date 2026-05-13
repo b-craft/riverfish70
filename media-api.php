@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 ob_start();
 
-session_start();
-
 require_once __DIR__ . '/config.php';
+
+riverfish_session_start();
 
 function riverfish_media_json(array $payload, int $code = 200): void
 {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-session_start();
-
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/store.php';
+
+riverfish_session_start();
 
 function riverfish_csrf_token(): string
 {
