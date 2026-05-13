@@ -121,10 +121,6 @@
 
           <div id="panel-media" class="tab-panel hidden max-w-5xl space-y-6">
             <h2 class="text-2xl font-bold">Папка с фотографиями</h2>
-            <p class="text-sm leading-relaxed text-zinc-400">
-              В полях «URL фото» можно указывать только имя файла — на сайте путь соберётся как
-              <span class="font-mono text-yellow-500">папка/файл</span>. Полные https://-ссылки не трогаем.
-            </p>
             <div>
               <label class="text-sm text-zinc-400">Имя папки на сайте (для путей)</label>
               <input
@@ -134,8 +130,27 @@
               />
             </div>
 
+            <div id="media-disk-panel" class="space-y-3 rounded-2xl border border-emerald-800/40 bg-emerald-950/20 p-5">
+              <h3 class="text-sm font-semibold text-emerald-200">Папка на диске</h3>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  id="btn-media-pick-dir"
+                  class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-500"
+                >
+                  Выбрать папку media…
+                </button>
+                <button
+                  type="button"
+                  id="btn-media-disk-off"
+                  class="hidden rounded-xl border border-zinc-600 px-4 py-2 text-sm font-semibold text-zinc-200 hover:border-zinc-400"
+                >
+                  Отключить папку
+                </button>
+              </div>
+            </div>
+
             <div id="media-php-ui" class="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
-              <p id="media-php-status" class="text-sm text-zinc-400"></p>
               <div class="flex flex-wrap items-center gap-2">
                 <input type="file" id="media-file-input" multiple accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/avif,.jpg,.jpeg,.png,.gif,.webp,.svg,.avif" class="max-w-full text-sm" />
                 <button type="button" id="btn-media-upload" class="rounded-xl bg-yellow-500 px-4 py-2 text-sm font-bold text-zinc-950 hover:bg-yellow-400">
@@ -147,12 +162,6 @@
               </div>
               <div id="media-file-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
             </div>
-
-            <p id="media-file-hint-file" class="hidden rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
-              Сейчас страница открыта как <strong>файл с диска</strong> (file://). Браузер не даст загрузить файлы на сервер.
-              Откройте конструктор по адресу вида <span class="font-mono">http://localhost/…/cms.html</span> (PHP должен быть включён),
-              либо используйте <a href="cms.php" class="font-semibold text-yellow-400 underline">cms.php</a> на хостинге — там же работает папка media.
-            </p>
           </div>
 
           <div id="panel-brand" class="tab-panel hidden max-w-3xl space-y-6">
@@ -472,6 +481,238 @@
         var B = window.RiverFishBuilder
         var state = { site: {}, products: [], siteContent: {} }
         var phpMediaCsrf = ''
+        var mediaPhpListWorks = undefined
+        var localMediaDirHandle = null
+        var MEDIA_IDB = 'riverfish-cms-media'
+        var MEDIA_IDB_STORE = 'kv'
+        var MEDIA_IDB_KEY = 'mediaDir'
+        var mediaGridBlobUrls = []
+
+        function parseDirectoryListingHtml(html) {
+          if (!html || typeof html !== 'string') return []
+          var seen = {}
+          var out = []
+          var re = /href\s*=\s*"([^"]*)"|href\s*=\s*'([^']*)'/gi
+          var m
+          while ((m = re.exec(html)) !== null) {
+            var raw = m[1] || m[2]
+            if (!raw || raw === '../' || raw === '..') continue
+            if (/^javascript:/i.test(raw)) continue
+            var dec = raw
+            try {
+              dec = decodeURIComponent(raw.replace(/\+/g, ' '))
+            } catch (e) {}
+            dec = String(dec).replace(/\\/g, '/')
+            var q = dec.indexOf('?')
+            if (q !== -1) dec = dec.slice(0, q)
+            var hash = dec.indexOf('#')
+            if (hash !== -1) dec = dec.slice(0, hash)
+            dec = dec.split('/').filter(Boolean).pop() || ''
+            if (!dec || dec === '..' || dec === '.') continue
+            if (dec.slice(-1) === '/') continue
+            if (!safeMediaFileName(dec)) continue
+            if (seen[dec]) continue
+            seen[dec] = true
+            out.push({ name: dec, size: 0 })
+          }
+          out.sort(function (a, b) {
+            return a.name.localeCompare(b.name, 'ru')
+          })
+          return out
+        }
+
+        function fetchStaticMediaFolderList() {
+          if (window.location.protocol === 'file:') return Promise.resolve([])
+          var folder = mediaFolderInput().replace(/^\/+/, '').replace(/\/+$/, '') || 'media'
+          var url = new URL(folder + '/', window.location.href).href
+          return fetch(url, { credentials: 'same-origin' })
+            .then(function (r) {
+              if (!r.ok) return []
+              var ct = (r.headers.get('content-type') || '').toLowerCase()
+              return r.text().then(function (text) {
+                if (ct.indexOf('text/html') !== -1 || /<\s*html[\s>]/i.test(String(text).slice(0, 500))) {
+                  return parseDirectoryListingHtml(text)
+                }
+                try {
+                  var j = JSON.parse(text)
+                  if (j && Array.isArray(j.files)) {
+                    return j.files
+                      .map(function (n) {
+                        return { name: String(n), size: 0 }
+                      })
+                      .filter(function (x) {
+                        return safeMediaFileName(x.name)
+                      })
+                  }
+                } catch (e) {}
+                return []
+              })
+            })
+            .catch(function () {
+              return []
+            })
+        }
+
+        function canPickLocalMediaFolder() {
+          return typeof window.showDirectoryPicker === 'function' && window.isSecureContext === true
+        }
+
+        function mediaIdbOpen() {
+          return new Promise(function (resolve, reject) {
+            var req = indexedDB.open(MEDIA_IDB, 1)
+            req.onerror = function () {
+              reject(req.error)
+            }
+            req.onupgradeneeded = function () {
+              if (!req.result.objectStoreNames.contains(MEDIA_IDB_STORE)) {
+                req.result.createObjectStore(MEDIA_IDB_STORE)
+              }
+            }
+            req.onsuccess = function () {
+              resolve(req.result)
+            }
+          })
+        }
+
+        function mediaIdbPut(handle) {
+          return mediaIdbOpen().then(function (db) {
+            return new Promise(function (resolve, reject) {
+              var tx = db.transaction(MEDIA_IDB_STORE, 'readwrite')
+              tx.oncomplete = function () {
+                resolve()
+              }
+              tx.onerror = function () {
+                reject(tx.error)
+              }
+              tx.objectStore(MEDIA_IDB_STORE).put(handle, MEDIA_IDB_KEY)
+            })
+          })
+        }
+
+        function mediaIdbGet() {
+          return mediaIdbOpen().then(function (db) {
+            return new Promise(function (resolve, reject) {
+              var tx = db.transaction(MEDIA_IDB_STORE, 'readonly')
+              var rq = tx.objectStore(MEDIA_IDB_STORE).get(MEDIA_IDB_KEY)
+              rq.onsuccess = function () {
+                resolve(rq.result)
+              }
+              rq.onerror = function () {
+                reject(rq.error)
+              }
+            })
+          })
+        }
+
+        function mediaIdbDel() {
+          return mediaIdbOpen().then(function (db) {
+            return new Promise(function (resolve, reject) {
+              var tx = db.transaction(MEDIA_IDB_STORE, 'readwrite')
+              tx.oncomplete = function () {
+                resolve()
+              }
+              tx.onerror = function () {
+                reject(tx.error)
+              }
+              tx.objectStore(MEDIA_IDB_STORE).delete(MEDIA_IDB_KEY)
+            })
+          })
+        }
+
+        function ensureLocalDirPermission(h) {
+          var opts = { mode: 'readwrite' }
+          if (!h || typeof h.queryPermission !== 'function') return Promise.resolve(false)
+          return h.queryPermission(opts).then(function (s) {
+            if (s === 'granted') return true
+            if (s === 'denied') return false
+            if (typeof h.requestPermission === 'function') {
+              return h.requestPermission(opts).then(function (s2) {
+                return s2 === 'granted'
+              })
+            }
+            return false
+          })
+        }
+
+        function listLocalMediaFromHandle(dirHandle) {
+          var out = []
+          var iter = dirHandle.values()
+          function step() {
+            return iter.next().then(function (res) {
+              if (res.done) {
+                out.sort(function (a, b) {
+                  return a.name.localeCompare(b.name, 'ru')
+                })
+                return out
+              }
+              var entry = res.value
+              if (entry.kind !== 'file') return step()
+              return dirHandle.getFileHandle(entry.name).then(function (fh) {
+                return fh.getFile().then(function (file) {
+                  var row = { name: entry.name, size: file.size }
+                  if (/\.(jpe?g|png|gif|webp|avif|svg)$/i.test(entry.name)) {
+                    row.previewObjectUrl = URL.createObjectURL(file)
+                  }
+                  out.push(row)
+                  return step()
+                })
+              })
+            })
+          }
+          return step()
+        }
+
+        function safeMediaFileName(name) {
+          var base = String(name || '')
+            .replace(/\\/g, '/')
+            .split('/')
+            .pop()
+          if (!base || base === '.' || base === '..') return null
+          if (/[\x00-\x1f]/.test(base) || /[\/\\]/.test(base)) return null
+          if (base.indexOf('..') !== -1) return null
+          return base
+        }
+
+        function updateMediaDiskPanelUi() {
+          var pick = document.getElementById('btn-media-pick-dir')
+          var off = document.getElementById('btn-media-disk-off')
+          var panel = document.getElementById('media-disk-panel')
+          if (!pick || !off) return
+          if (!canPickLocalMediaFolder()) {
+            if (panel) panel.classList.add('hidden')
+            return
+          }
+          if (panel) panel.classList.remove('hidden')
+          if (localMediaDirHandle) {
+            pick.classList.add('hidden')
+            off.classList.remove('hidden')
+          } else {
+            pick.classList.remove('hidden')
+            off.classList.add('hidden')
+          }
+        }
+
+        function tryRestoreLocalMediaHandle() {
+          if (!canPickLocalMediaFolder()) {
+            updateMediaDiskPanelUi()
+            return Promise.resolve()
+          }
+          return mediaIdbGet()
+            .then(function (h) {
+              if (!h) return
+              return ensureLocalDirPermission(h).then(function (ok) {
+                if (ok) localMediaDirHandle = h
+                else {
+                  localMediaDirHandle = null
+                  return mediaIdbDel()
+                }
+              })
+            })
+            .catch(function () {})
+            .then(function () {
+              updateMediaDiskPanelUi()
+            })
+        }
 
         function parseDefaults() {
           try {
@@ -533,7 +774,12 @@
         }
 
         function publicFileUrl(name) {
-          return new URL(mediaFolderInput() + '/' + encodeURIComponent(name), window.location.href).href
+          var raw = mediaFolderInput().replace(/^\/+/, '').replace(/\/+$/, '') || 'media'
+          var parts = raw.split('/').filter(Boolean).map(function (p) {
+            return encodeURIComponent(p)
+          })
+          parts.push(encodeURIComponent(name))
+          return new URL(parts.join('/'), window.location.href).href
         }
 
         function parseJsonResponse(r) {
@@ -567,18 +813,50 @@
           return fetch(mediaApiUrl(), { method: 'POST', body: fd, credentials: 'include' }).then(parseJsonResponse)
         }
 
+        /** Запись в media: PHP+csrf или выбор папки (Chrome/Edge). skipPicker — не открывать диалог второй раз (после отмены первого). */
+        function ensureMediaWriteTarget(options) {
+          options = options || {}
+          if (localMediaDirHandle) return Promise.resolve(true)
+          if (window.location.protocol === 'file:') return Promise.resolve(false)
+          return postMediaLogin().then(function (j) {
+            if (j && j.csrf) {
+              phpMediaCsrf = j.csrf
+              return true
+            }
+            phpMediaCsrf = ''
+            if (!options.skipPicker && canPickLocalMediaFolder()) {
+              return window
+                .showDirectoryPicker({ mode: 'readwrite', id: 'riverfish70-media' })
+                .then(function (h) {
+                  localMediaDirHandle = h
+                  return mediaIdbPut(h).then(function () {
+                    updateMediaDiskPanelUi()
+                    return true
+                  })
+                })
+            }
+            return false
+          })
+        }
+
         function renderMediaGrid(files) {
           var grid = document.getElementById('media-file-grid')
           if (!grid) return
+          var prevBlob = mediaGridBlobUrls
+          mediaGridBlobUrls = []
           var folder = mediaFolderInput()
+          ;(files || []).forEach(function (f) {
+            if (f.previewObjectUrl) mediaGridBlobUrls.push(f.previewObjectUrl)
+          })
           grid.innerHTML = (files || [])
             .map(function (f) {
               var rel = folder + '/' + f.name
               var isImg = /\.(jpe?g|png|gif|webp|avif|svg)$/i.test(f.name)
+              var src = f.previewObjectUrl || publicFileUrl(f.name)
               var img = isImg
                 ? '<img src="' +
-                  escapeHtml(publicFileUrl(f.name)) +
-                  '" alt="" class="h-32 w-full rounded-lg object-cover bg-zinc-800"/>'
+                  escapeHtml(src) +
+                  '" alt="" class="h-32 w-full rounded-lg object-cover bg-zinc-800" loading="lazy"/>'
                 : '<div class="flex h-32 items-center justify-center rounded-lg bg-zinc-800 text-xs text-zinc-500">Файл</div>'
               return (
                 '<div class="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-3">' +
@@ -620,13 +898,40 @@
           grid.querySelectorAll('.media-del').forEach(function (b) {
             b.addEventListener('click', function () {
               var n = b.getAttribute('data-name')
-              if (!confirm('Удалить файл «' + n + '» с сервера?')) return
+              if (!localMediaDirHandle) {
+                if (!confirm('Удалить файл «' + n + '» с сервера?')) return
+              }
               deleteMediaFile(n)
             })
+          })
+          prevBlob.forEach(function (u) {
+            try {
+              URL.revokeObjectURL(u)
+            } catch (e) {}
           })
         }
 
         function deleteMediaFile(name) {
+          if (localMediaDirHandle) {
+            if (!confirm('Удалить файл «' + name + '» из выбранной папки на диске?')) return
+            ensureLocalDirPermission(localMediaDirHandle)
+              .then(function (ok) {
+                if (!ok) {
+                  alert('Нет доступа к папке. Подключите её снова.')
+                  return null
+                }
+                return localMediaDirHandle.removeEntry(name)
+              })
+              .then(function (r) {
+                if (r === null) return
+                showFlash('Файл удалён')
+                refreshMediaPanel()
+              })
+              .catch(function (e) {
+                alert((e && e.message) || 'Ошибка удаления')
+              })
+            return
+          }
           var fd = new FormData()
           fd.append('action', 'delete')
           fd.append('csrf', phpMediaCsrf)
@@ -644,9 +949,55 @@
             })
         }
 
+        function uploadMediaFilesLocal(files) {
+          var i = 0
+          function next() {
+            if (i >= files.length) {
+              showFlash('Файлы записаны в папку на диске')
+              var inp = document.getElementById('media-file-input')
+              if (inp) inp.value = ''
+              refreshMediaPanel()
+              return
+            }
+            var name = safeMediaFileName(files[i].name)
+            if (!name) {
+              alert('Недопустимое имя: ' + files[i].name)
+              i++
+              next()
+              return
+            }
+            ensureLocalDirPermission(localMediaDirHandle)
+              .then(function (ok) {
+                if (!ok) throw new Error('Нет доступа к папке')
+                return localMediaDirHandle.getFileHandle(name, { create: true })
+              })
+              .then(function (fileHandle) {
+                return fileHandle.createWritable().then(function (writable) {
+                  return writable.write(files[i]).then(function () {
+                    return writable.close()
+                  })
+                })
+              })
+              .then(function () {
+                i++
+                next()
+              })
+              .catch(function (e) {
+                alert('Файл «' + files[i].name + '»: ' + ((e && e.message) || String(e)))
+                i++
+                next()
+              })
+          }
+          next()
+        }
+
         function uploadMediaFiles(fileList) {
           var files = fileList ? Array.prototype.slice.call(fileList) : []
           if (!files.length) return
+          if (localMediaDirHandle) {
+            uploadMediaFilesLocal(files)
+            return
+          }
           var i = 0
           function next() {
             if (i >= files.length) {
@@ -678,74 +1029,78 @@
         }
 
         function refreshMediaPanel() {
-          var st = document.getElementById('media-php-status')
-          var hint = document.getElementById('media-file-hint-file')
           var phpUi = document.getElementById('media-php-ui')
-          if (window.location.protocol === 'file:') {
-            if (hint) hint.classList.remove('hidden')
-            if (phpUi) phpUi.classList.add('hidden')
-            if (st) st.textContent = ''
+
+          function applyLocalList() {
+            if (!localMediaDirHandle) return Promise.resolve()
+            return ensureLocalDirPermission(localMediaDirHandle).then(function (ok) {
+              if (!ok) {
+                localMediaDirHandle = null
+                return mediaIdbDel().then(function () {
+                  updateMediaDiskPanelUi()
+                  refreshMediaPanel()
+                })
+              }
+              return listLocalMediaFromHandle(localMediaDirHandle).then(function (files) {
+                if (phpUi) phpUi.classList.remove('hidden')
+                renderMediaGrid(files)
+              })
+            })
+          }
+
+          if (localMediaDirHandle && window.location.protocol !== 'file:') {
+            mediaPhpListWorks = false
+            applyLocalList().catch(function () {
+              renderMediaGrid([])
+            })
             return
           }
-          if (hint) hint.classList.add('hidden')
+
+          if (window.location.protocol === 'file:') {
+            if (phpUi) phpUi.classList.remove('hidden')
+            renderMediaGrid([])
+            return
+          }
+
           if (phpUi) phpUi.classList.remove('hidden')
-          if (st) st.textContent = 'Загрузка списка…'
-          fetchMediaList().then(function (j) {
+          function afterPhpListFailed() {
+            mediaPhpListWorks = false
+            return fetchStaticMediaFolderList().then(function (staticFiles) {
+              renderMediaGrid(staticFiles.length ? staticFiles : [])
+            })
+          }
+          fetchMediaList()
+            .then(function (j) {
             if (j && j.csrf) phpMediaCsrf = j.csrf
             if (j && j.ok && Array.isArray(j.files)) {
-              if (st) st.textContent = 'Файлов: ' + j.files.length + '. Файлы на сервере в папке media/ (рядом с media-api.php).'
+              mediaPhpListWorks = true
               renderMediaGrid(j.files)
               return
             }
             if (j && j.error === 'auth_required') {
               return postMediaLogin().then(function (j2) {
                 if (!j2 || !j2.ok) {
-                  if (st) {
-                    st.textContent =
-                      'Вход в media-api.php не удался. Пароль в начале cms.html должен совпадать с RIVERFISH_CMS_PASSWORD в config.php.'
-                  }
-                  return null
+                  return afterPhpListFailed()
                 }
                 phpMediaCsrf = j2.csrf
                 return fetchMediaList()
               }).then(function (j3) {
-                if (!j3) return
+                if (j3 === undefined) return
                 if (j3 && j3.csrf) phpMediaCsrf = j3.csrf
                 if (j3 && j3.ok && Array.isArray(j3.files)) {
-                  if (st) st.textContent = 'Файлов: ' + j3.files.length + '.'
+                  mediaPhpListWorks = true
                   renderMediaGrid(j3.files)
-                } else if (st) {
-                  st.textContent = 'Не удалось получить список: ' + ((j3 && j3.error) || 'ошибка')
+                } else {
+                  return afterPhpListFailed()
                 }
               })
             }
-            if (st) {
-              if (j && j.error === 'bad_json') {
-                var pv = String((j && j.preview) || '')
-                var looksPhp = /^\s*<\?php/i.test(pv)
-                var looksHtml = /^<!DOCTYPE/i.test(pv) || /^<html/i.test(pv)
-                var livePort = window.location.port === '5500' || window.location.port === '5501'
-                if (looksPhp || (livePort && j.httpStatus === 200)) {
-                  st.innerHTML =
-                    '<strong class="text-amber-200">Live Server не выполняет PHP</strong> — по адресу с портом 5500 отдаётся <em>текст</em> файла media-api.php, поэтому не JSON. ' +
-                    'Закройте эту вкладку с Live Server и запустите в папке сайта файл <code class="rounded bg-zinc-800 px-1">start-php-server.cmd</code>, ' +
-                    'затем откройте <a class="text-yellow-400 underline" href="http://127.0.0.1:8080/cms.html" target="_blank" rel="noopener">http://127.0.0.1:8080/cms.html</a> (или OpenServer / XAMPP).'
-                } else if (looksHtml) {
-                  st.textContent =
-                    'Сервер вернул HTML (часто страница 404/ошибка), а не JSON. Проверьте URL и что PHP включён для этой папки.'
-                } else {
-                  st.textContent =
-                    'Ответ не JSON (код ' +
-                    (j.httpStatus != null ? j.httpStatus : '?') +
-                    '). Откройте в браузере: ' +
-                    mediaApiUrl() +
-                    '?action=list — по тексту страницы видна причина.'
-                }
-              } else {
-                st.textContent = 'Ошибка: ' + ((j && j.error) || 'проверьте PHP и файл media-api.php')
-              }
-            }
-          })
+            return afterPhpListFailed()
+            })
+            .catch(function () {
+              mediaPhpListWorks = false
+              return afterPhpListFailed()
+            })
         }
 
         var tabs = [
@@ -800,19 +1155,101 @@
             alert('Выберите один или несколько файлов.')
             return
           }
-          if (window.location.protocol === 'file:') return
-          function run() {
-            uploadMediaFiles(inp.files)
+          var files = inp.files
+          if (localMediaDirHandle) {
+            uploadMediaFiles(files)
+            return
           }
-          if (!phpMediaCsrf) {
-            postMediaLogin().then(function (j) {
-              if (j && j.csrf) phpMediaCsrf = j.csrf
-              run()
+          if (window.location.protocol === 'file:') {
+            alert('Откройте конструктор по адресу http:// (не как файл с диска).')
+            return
+          }
+
+          function uploadViaPhpOrFail() {
+            return ensureMediaWriteTarget({ skipPicker: true }).then(function (ok) {
+              if (!ok) {
+                alert('Не удалось записать в папку media: включите PHP или выберите папку media в Chrome/Edge.')
+                return
+              }
+              uploadMediaFiles(files)
+            })
+          }
+
+          if (mediaPhpListWorks === true) {
+            uploadViaPhpOrFail().catch(function (e) {
+              alert((e && e.message) || String(e))
             })
             return
           }
-          run()
+
+          if (canPickLocalMediaFolder()) {
+            window
+              .showDirectoryPicker({ mode: 'readwrite', id: 'riverfish70-media' })
+              .then(function (h) {
+                localMediaDirHandle = h
+                return mediaIdbPut(h)
+              })
+              .then(function () {
+                updateMediaDiskPanelUi()
+                mediaPhpListWorks = false
+                uploadMediaFiles(files)
+              })
+              .catch(function (e) {
+                if (e && e.name === 'AbortError') {
+                  uploadViaPhpOrFail().catch(function (e2) {
+                    alert((e2 && e2.message) || String(e2))
+                  })
+                  return
+                }
+                alert((e && e.message) || String(e))
+              })
+            return
+          }
+
+          uploadViaPhpOrFail().catch(function (e) {
+            alert((e && e.message) || String(e))
+          })
         })
+
+        var btnPickDir = document.getElementById('btn-media-pick-dir')
+        if (btnPickDir) {
+          btnPickDir.addEventListener('click', function () {
+            if (!canPickLocalMediaFolder()) return
+            window
+              .showDirectoryPicker({ mode: 'readwrite', id: 'riverfish70-media' })
+              .then(function (h) {
+                localMediaDirHandle = h
+                return mediaIdbPut(h)
+              })
+              .then(function () {
+                updateMediaDiskPanelUi()
+                refreshMediaPanel()
+              })
+              .catch(function (e) {
+                if (e && e.name === 'AbortError') return
+                alert((e && e.message) || String(e))
+              })
+          })
+        }
+        var btnDiskOff = document.getElementById('btn-media-disk-off')
+        if (btnDiskOff) {
+          btnDiskOff.addEventListener('click', function () {
+            localMediaDirHandle = null
+            mediaIdbDel()
+              .catch(function () {})
+              .then(function () {
+                updateMediaDiskPanelUi()
+                refreshMediaPanel()
+              })
+          })
+        }
+        var mfin = document.getElementById('f-media-folder')
+        if (mfin) {
+          mfin.addEventListener('change', function () {
+            var p = document.getElementById('panel-media')
+            if (p && !p.classList.contains('hidden')) refreshMediaPanel()
+          })
+        }
 
         function rowNav(item) {
           return (
@@ -1282,7 +1719,9 @@
           state = loadData()
           stateToEditors()
           renderProducts()
-          initTabs()
+          tryRestoreLocalMediaHandle().then(function () {
+            initTabs()
+          })
           document.getElementById('screen-login').classList.add('hidden')
           document.getElementById('screen-app').classList.remove('hidden')
         })
@@ -1297,7 +1736,9 @@
           state = loadData()
           stateToEditors()
           renderProducts()
-          initTabs()
+          tryRestoreLocalMediaHandle().then(function () {
+            initTabs()
+          })
           document.getElementById('screen-login').classList.add('hidden')
           document.getElementById('screen-app').classList.remove('hidden')
         }
